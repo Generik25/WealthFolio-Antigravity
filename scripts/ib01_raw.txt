@@ -1,0 +1,79 @@
+raw_text = """
+ICSUAGD BLK ICS USD LIQ AGENCY DIS Cash and/or Derivatives Money Market 9,88 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 7,01 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 6,05 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 5,57 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 4,71 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 4,22 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 3,96 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 3,20 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 2,97 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 2,90 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,89 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,67 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,65 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,65 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 2,47 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,34 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 2,04 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,96 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,90 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,89 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,86 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,76 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,67 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,61 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,52 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,50 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,42 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,37 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,26 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 1,07 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,04 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,04 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,02 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,01 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,98 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,95 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,94 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,85 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,79 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,78 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,69 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,64 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,52 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,48 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,37 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,30 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,27 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,14 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,13 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,11 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,10 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,09 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,09 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,08 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,08 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,08 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,06 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,06 United States USD
+GBP GBP CASH Cash and/or Derivatives Cash 0,03 United Kingdom GBP
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,03 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,02 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,02 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,02 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,01 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,01 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,01 United States USD
+TBILL TREASURY BILL Cash and/or Derivatives Cash 0,01 United States USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,01 United States USD
+MXN MXN CASH Cash and/or Derivatives Cash 0,00 Mexico MXN
+TNOTE TREASURY NOTE Treasury Fixed Income 0,00 United States USD
+EUR EUR CASH Cash and/or Derivatives Cash 0,00 European Union EUR
+JPY JPY CASH Cash and/or Derivatives Cash 0,00 Japan JPY
+USD USD CASH Cash and/or Derivatives Cash -2,81 United States USD
+"""
+
+with open("scripts/ib01_raw.txt", "w", encoding="utf-8") as f:
+    f.write(raw_text)
+print("Saved scripts/ib01_raw.txt")

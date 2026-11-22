@@ -1,0 +1,738 @@
+# Raw text from iShares Core MSCI EM IMI UCITS ETF - PDF 2 (Pages 21-35)
+
+is3n_part3_pages = [
+# Page 21
+"""
+916 CHINA LONGYUAN POWER GROUP CORP LT Utilities Equity 0,02 China HKD
+PCO PEPCO GROUP NV Consumer Discretionary Equity 0,02 Poland PLN
+2615 WAN HAI LINES LTD Industrials Equity 0,02 Taiwan TWD
+AGILITY AGILITY GLOB PLC Industrials Equity 0,02 United Arab Emirates AED
+1020 BANK ALJAZIRA Financials Equity 0,02 Saudi Arabia SAR
+ASTRAL ASTRAL LTD Industrials Equity 0,02 India INR
+QEWS NEBRAS ENERGY Utilities Equity 0,02 Qatar QAR
+1476 ECLAT TEXTILE LTD Consumer Discretionary Equity 0,02 Taiwan TWD
+2588 BOC AVIATION LTD Industrials Equity 0,02 China HKD
+2542 HIGHWEALTH CONSTRUCTION CORP Real Estate Equity 0,02 Taiwan TWD
+MYR MYR CASH Cash and/or Derivatives Cash 0,01 Malaysia MYR
+1102 ASIA CEMENT CORP Materials Equity 0,01 Taiwan TWD
+047040 DAEWOO ENGINEERING & CONSTRUCTION Industrials Equity 0,01 Korea (South) KRW
+047050 POSCO INTERNATIONAL CORP Industrials Equity 0,01 Korea (South) KRW
+139130 DGB FINANCIAL GROUP Financials Equity 0,01 Korea (South) KRW
+ALI AYALA LAND INC Real Estate Equity 0,01 Philippines PHP
+JOYY JOYY ADR INC Communication Equity 0,01 China USD
+6969 SMOORE INTERNATIONAL HOLDINGS LTD Consumer Staples Equity 0,01 China HKD
+AC AYALA CORP Industrials Equity 0,01 Philippines PHP
+002714 MUYUAN FOODS GROUP LTD A Consumer Staples Equity 0,01 China CNY
+ALKEM ALKEM LABORATORIES LTD Health Care Equity 0,01 India INR
+062040 SANIL ELECTRIC LTD Industrials Equity 0,01 Korea (South) KRW
+KIMS KRISHNA INSTITUTE OF MEDICAL SCIEN Health Care Equity 0,01 India INR
+3131 GRAND PLASTIC TECHNOLOGY CORP Information Technology Equity 0,01 Taiwan TWD
+1193 CHINA RESOURCES GAS GROUP LTD Utilities Equity 0,01 China HKD
+THERMAX THERMAX Industrials Equity 0,01 India INR
+MINT.R MINOR INTERNATIONAL PUBLIC NON-VOT Consumer Discretionary Equity 0,01 Thailand THB
+SM SM INVESTMENTS CORP Industrials Equity 0,01 Philippines PHP
+2290 YANBU NATIONAL PETROCHEMICALS Materials Equity 0,01 Saudi Arabia SAR
+3006 ELITE SEMICONDUCTOR MICROELECTRONI Information Technology Equity 0,01 Taiwan TWD
+MBT METROPOLITAN BANK AND TRUST CO Financials Equity 0,01 Philippines PHP
+-- TORRENT PHARMACEUTICAL Health Care Equity 0,01 India INR
+601225 SHAANXI COAL INDUSTRY LTD A Energy Equity 0,01 China CNY
+000725 BOE TECHNOLOGY GROUP LTD A Information Technology Equity 0,01 China CNY
+JSL JINDAL STAINLESS LTD Materials Equity 0,01 India INR
+9688 ZAI LAB LTD Health Care Equity 0,01 China HKD
+KARURVYSYA KARUR VYSYA BANK LTD Financials Equity 0,01 India INR
+TATACOMM TATA COMMUNICATIONS LTD Communication Equity 0,01 India INR
+3324 AURAS TECHNOLOGY LTD Information Technology Equity 0,01 Taiwan TWD
+ASAI3 SENDAS DISTRIBUIDORA SA Consumer Staples Equity 0,01 Brazil BRL
+DIALOG DIALOG GROUP Energy Equity 0,01 Malaysia MYR
+300433 LENS TECHNOLOGY LTD A Information Technology Equity 0,01 China CNY
+OBEROIRLTY OBEROI REALTY LTD Real Estate Equity 0,01 India INR
+2455 VISUAL PHOTONICS EPITAXY LTD Information Technology Equity 0,01 Taiwan TWD
+5269 ASMEDIA TECHNOLOGY INC Information Technology Equity 0,01 Taiwan TWD
+""",
+
+# Page 22
+"""
+6196 MARKETECH INTERNATIONAL CORP Information Technology Equity 0,01 Taiwan TWD
+601601 CHINA PACIFIC INSURANCE (GROUP) LT Financials Equity 0,01 China CNY
+AEGISLOG AEGIS LOGISTICS LTD Energy Equity 0,01 India INR
+180640 HANJIN KAL Consumer Discretionary Equity 0,01 Korea (South) KRW
+MBRF3 MARFRIG GLOBAL FOODS SA Consumer Staples Equity 0,01 Brazil BRL
+1070 TCL ELECTRONICS HOLDINGS LTD Consumer Discretionary Equity 0,01 China HKD
+601939 CHINA CONSTRUCTION BANK CORP A Financials Equity 0,01 China CNY
+1503 SHIHLIN ELECTRIC AND ENGINEERING C Industrials Equity 0,01 Taiwan TWD
+OPTIMA OPTIMA BANK S.A. SA Financials Equity 0,01 Greece EUR
+082740 HANWHA ENGINE LTD Industrials Equity 0,01 Korea (South) KRW
+JUBLFOOD JUBILANT FOODWORKS LTD Consumer Discretionary Equity 0,01 India INR
+780 TONGCHENG TRAVEL HOLDINGS LTD Consumer Discretionary Equity 0,01 China HKD
+688072 PIOTECH INC A Information Technology Equity 0,01 China CNY
+3898 ZHUZHOU CRRC TIMES ELECTRIC LTD H Industrials Equity 0,01 China HKD
+000001 PING AN BANK LTD A Financials Equity 0,01 China CNY
+8112 SUPREME ELECTRONICS LTD Information Technology Equity 0,01 Taiwan TWD
+600919 BANK OF JIANGSU CORPORATION LTD A Financials Equity 0,01 China CNY
+QL QL RESOURCES Consumer Staples Equity 0,01 Malaysia MYR
+001440 TAIHAN C&S LTD Industrials Equity 0,01 Korea (South) KRW
+SAHOL.E HACI OMER SABANCI HOLDING A Financials Equity 0,01 Turkey TRY
+000250 SAM CHUN DANG PHARM LTD Health Care Equity 0,01 Korea (South) KRW
+392 BEIJING ENTERPRISES HOLDINGS LTD Utilities Equity 0,01 China HKD
+298380 ABL BIO INC Health Care Equity 0,01 Korea (South) KRW
+CAMS COMPUTER AGE MANAGEMENT SERVICES L Industrials Equity 0,01 India INR
+3211 DYNAPACK INTERNATIONAL TECHNOLOGY Information Technology Equity 0,01 Taiwan TWD
+QFLS QATAR FUEL Energy Equity 0,01 Qatar QAR
+002142 BANK OF NINGBO LTD A Financials Equity 0,01 China CNY
+LICHSGFIN LIC HOUSING FINANCE LTD Financials Equity 0,01 India INR
+INDF INDOFOOD SUKSES MAKMUR Consumer Staples Equity 0,01 Indonesia IDR
+3323 CHINA NATIONAL BUILDING MATERIAL L Materials Equity 0,01 China HKD
+3896 KINGSOFT CLOUD HOLDINGS LTD Information Technology Equity 0,01 China HKD
+011790 SKC LTD Materials Equity 0,01 Korea (South) KRW
+ENGI11 ENERGISA UNITS SA Utilities Equity 0,01 Brazil BRL
+390 CHINA RAILWAY GROUP LTD H Industrials Equity 0,01 China HKD
+LEGN LEGEND BIOTECH ADR REP CORP Health Care Equity 0,01 China USD
+6005 CAPITAL SECURITIES CORP Financials Equity 0,01 Taiwan TWD
+6944 MEGA UNION TECHNOLOGY INC Industrials Equity 0,01 Taiwan TWD
+300408 CHAOZHOU THREE-CIRCLE (GROUP) LTD Information Technology Equity 0,01 China CNY
+300760 SHENZHEN MINDRAY BIO-MEDICAL ELECT Health Care Equity 0,01 China CNY
+RES RESILIENT PROP LTD Real Estate Equity 0,01 South Africa ZAR
+GESHIP GREAT EASTERN SHIPPING COMPANY LTD Energy Equity 0,01 India INR
+TAEE11 TRANSMISSORA ALIANCA ENERGIA ELETR Utilities Equity 0,01 Brazil BRL
+BRMS BUMI RESOURCES MINERALS Materials Equity 0,01 Indonesia IDR
+TIMECOM TIME DOTCOM Communication Equity 0,01 Malaysia MYR
+MOTILALOFS MOTILAL OSWAL FINANCIAL SERVICES L Financials Equity 0,01 India INR
+""",
+
+# Page 23
+"""
+CDSL CENTRAL DEPOSITORY SERVICES (INDIA Financials Equity 0,01 India INR
+2610 CHINA AIRLINES LTD Industrials Equity 0,01 Taiwan TWD
+6691 YANKEY ENGINEERING LTD Industrials Equity 0,01 Taiwan TWD
+3360 FAR EAST HORIZON LTD Financials Equity 0,01 China HKD
+TEL PLDT INC Communication Equity 0,01 Philippines PHP
+DUBK DUKHAN BANK Financials Equity 0,01 Qatar QAR
+ANANDRATHI ANAND RATHI WEALTH LTD Financials Equity 0,01 India INR
+ICICIPRULI ICICI PRUDENTIAL LIFE INSURANCE CO Financials Equity 0,01 India INR
+1044 HENGAN INTERNATIONAL GROUP LTD Consumer Staples Equity 0,01 China HKD
+600031 SANY HEAVY INDUSTRY LTD A Industrials Equity 0,01 China CNY
+175330 JB FINANCIAL GROUP LTD Financials Equity 0,01 Korea (South) KRW
+087010 PEPTRON INC Health Care Equity 0,01 Korea (South) KRW
+CROMPTON CROMPTON GREAVES CONSUMER ELECTRIC Consumer Discretionary Equity 0,01 India INR
+002353 YANTAI JEREH OILFIELD SERVICES GRO Energy Equity 0,01 China CNY
+2458 ELAN MICROELECTRONICS CORP Information Technology Equity 0,01 Taiwan TWD
+004020 HYUNDAI STEEL Materials Equity 0,01 Korea (South) KRW
+600028 CHINA PETROLEUM & CHEMICAL CORP A Energy Equity 0,01 China CNY
+1560 KINIK Industrials Equity 0,01 Taiwan TWD
+CONCOR CONTAINER CORPORATION OF INDIA LTD Industrials Equity 0,01 India INR
+1585 YADEA GROUP HOLDINGS LTD Consumer Discretionary Equity 0,01 China HKD
+IGRD ESTITHMAR HOLDING Industrials Equity 0,01 Qatar QAR
+2689 NINE DRAGONS PAPER HOLDINGS LTD Materials Equity 0,01 China HKD
+6121 SIMPLO TECHNOLOGY LTD Information Technology Equity 0,01 Taiwan TWD
+6510 CHUNGHWA PRECISION TEST TECH LTD Information Technology Equity 0,01 Taiwan TWD
+AVI AVI LTD Consumer Staples Equity 0,01 South Africa ZAR
+VFQS VODAFONE QATAR Communication Equity 0,01 Qatar QAR
+HYP HYPROP INVS LTD Real Estate Equity 0,01 South Africa ZAR
+AJANTPHARM AJANTA PHARMA LTD Health Care Equity 0,01 India INR
+111770 YOUNGONE CORP Consumer Discretionary Equity 0,01 Korea (South) KRW
+601816 BEIJING-SHANGHAI HIGH SPEED RAILWA Industrials Equity 0,01 China CNY
+ITUB3 ITAU UNIBANCO HOLDING SA Financials Equity 0,01 Brazil BRL
+600176 CHINA JUSHI LTD A Materials Equity 0,01 China CNY
+MULT3 MULTIPLAN EMPREENDIMENTOS IMOBILIA Real Estate Equity 0,01 Brazil BRL
+HSCL HIMADRI SPECIALITY CHEMICAL LTD Materials Equity 0,01 India INR
+326030 SK BIOPHARMACEUTICALS LTD Health Care Equity 0,01 Korea (South) KRW
+CHOLAHLDNG CHOLAMANDALAM FINANCIAL HOLDINGS L Financials Equity 0,01 India INR
+BRPT BARITO PACIFIC Materials Equity 0,01 Indonesia IDR
+2883 CHINA OILFIELD SERVICES LTD H Energy Equity 0,01 China HKD
+1802 TAIWAN GLASS INDUSTRY CORP Industrials Equity 0,01 Taiwan TWD
+2105 CHENG SHIN RUBBER INDUSTRY LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+1717 ETERNAL MATERIALS LTD Materials Equity 0,01 Taiwan TWD
+REDINGTON REDINGTON LTD Information Technology Equity 0,01 India INR
+PAGS PAGSEGURO DIGITAL LTD CLASS A Financials Equity 0,01 Brazil USD
+4100 MAKKAH CONSTRUCTION AND DEVELOPMEN Real Estate Equity 0,01 Saudi Arabia SAR
+HINDCOPPER HINDUSTAN COPPER LTD Materials Equity 0,01 India INR
+""",
+
+# Page 24
+"""
+586 CHINA CONCH VENTURE HOLDINGS LTD Industrials Equity 0,01 China HKD
+214450 PHARMARESEARCH LTD Health Care Equity 0,01 Korea (South) KRW
+6181 LAOPU GOLD LTD H Consumer Discretionary Equity 0,01 China HKD
+600309 WANHUA CHEMICAL GROUP LTD A Materials Equity 0,01 China CNY
+INARI INARI AMERTRON Information Technology Equity 0,01 Malaysia MYR
+1882 HAITIAN INTERNATIONAL LTD Industrials Equity 0,01 China HKD
+PPB PPB GROUP Consumer Staples Equity 0,01 Malaysia MYR
+NH NARAYANA HRUDAYALAYA LTD Health Care Equity 0,01 India INR
+443060 HD HYUNDAI MARINE SOLUTION LTD Industrials Equity 0,01 Korea (South) KRW
+SBICARD SBI CARDS & PAYMENT SERVICES LTD Financials Equity 0,01 India INR
+1357 MEITU INC Communication Equity 0,01 China HKD
+WHA.R WHA CORPORATION NON-VOTING DR PCL Real Estate Equity 0,01 Thailand THB
+ATAT ATOUR LIFESTYLE HOLDINGS AMERICAN Consumer Discretionary Equity 0,01 China USD
+AMBER AMBER ENTERPRISES INDIA LTD Consumer Discretionary Equity 0,01 India INR
+GRUPOARGOS INVERSIONES ARGOS SA Materials Equity 0,01 Colombia COP
+NAM.INDIA NIPPON LIFE INDIA ASSET MANAGMNT L Financials Equity 0,01 India INR
+GRUMAB GRUMA Consumer Staples Equity 0,01 Mexico MXN
+SAILIFE SAI LIFE SCIENCES LTD Health Care Equity 0,01 India INR
+Q* QUALITAS CONTROLADORA Financials Equity 0,01 Mexico MXN
+4749 ADVANCED ECHEM MATERIALS LTD Information Technology Equity 0,01 Taiwan TWD
+3023 SINBON ELECTRONICS LTD Information Technology Equity 0,01 Taiwan TWD
+4002 AL MOUWASAT MEDICAL SERVICES Health Care Equity 0,01 Saudi Arabia SAR
+BALKRISIND BALKRISHNA INDUSTRIES LTD Consumer Discretionary Equity 0,01 India INR
+FLUOROCHEM GUJARAT FLUOROCHEMICALS LTD Materials Equity 0,01 India INR
+000338 WEICHAI POWER LTD A Industrials Equity 0,01 China CNY
+CEMARGOS CEMENTOS ARGOS SA Materials Equity 0,01 Colombia COP
+403870 HPSP LTD Information Technology Equity 0,01 Korea (South) KRW
+3800 GCL TECHNOLOGY HOLDINGS LTD Information Technology Equity 0,01 China HKD
+014680 HANSOL CHEMICAL LTD Materials Equity 0,01 Korea (South) KRW
+BEM.R BANGKOK EXPRESSWAY AND METRO PCL N Industrials Equity 0,01 Thailand THB
+1229 LIEN HWA INDUSTRIAL HOLDINGS CORP Consumer Staples Equity 0,01 Taiwan TWD
+4200 ALDREES PETROLEUM AND TRANSPORT SE Consumer Discretionary Equity 0,01 Saudi Arabia SAR
+960 LONGFOR GROUP HOLDINGS LTD Real Estate Equity 0,01 China HKD
+KTLEV.E KATILIMEVIM TASARRUF FINANSMAN A.S Financials Equity 0,01 Turkey TRY
+475150 SK ETERNIX LTD Utilities Equity 0,01 Korea (South) KRW
+600989 NINGXIA BAOFENG ENERGY GROUP LTD A Materials Equity 0,01 China CNY
+066970 L&F LTD Industrials Equity 0,01 Korea (South) KRW
+051900 LG H & H LTD Consumer Staples Equity 0,01 Korea (South) KRW
+601919 COSCO SHIPPING HOLDINGS LTD A Industrials Equity 0,01 China CNY
+HYPE3 HYPERMARCAS SA Health Care Equity 0,01 Brazil BRL
+RA REGIONAL SAB DE CV Financials Equity 0,01 Mexico MXN
+9896 MINISO GROUP HOLDING LTD Consumer Discretionary Equity 0,01 China HKD
+006360 GS ENGINEERING & CONSTRUCTION CORP Industrials Equity 0,01 Korea (South) KRW
+3406 GENIUS ELECTRONIC OPTICAL LTD Information Technology Equity 0,01 Taiwan TWD
+2354 FOXCONN TECHNOLOGY LTD Information Technology Equity 0,01 Taiwan TWD
+""",
+
+# Page 25
+"""
+OMN OMNIA HOLDINGS LTD Materials Equity 0,01 South Africa ZAR
+ENA ENEA SA Utilities Equity 0,01 Poland PLN
+8464 NIEN MADE ENTERPRISE LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+128940 HANMI PHARM LTD Health Care Equity 0,01 Korea (South) KRW
+0126Z0 SAMSUNG EPIS HOLDINGS LTD Health Care Equity 0,01 Korea (South) KRW
+KPIL KALPATARU PROJECTS INTERNATIONAL L Industrials Equity 0,01 India INR
+001450 HYUNDAI MARINE & FIRE INSURANCE LT Financials Equity 0,01 Korea (South) KRW
+002463 WUS PRINTED CIRCUIT (KUNSHAN) LTD Information Technology Equity 0,01 China CNY
+3450 ELITE ADVANCED LASER CORP Information Technology Equity 0,01 Taiwan TWD
+1111 SAUDI TADAWUL GROUP CO Financials Equity 0,01 Saudi Arabia SAR
+FFB FORTRESS REAL EST INV B LTD Real Estate Equity 0,01 South Africa ZAR
+1133 HARBIN ELECTRIC LTD H Industrials Equity 0,01 China HKD
+141080 LIGA CHEM BIO INC Health Care Equity 0,01 Korea (South) KRW
+2983 HESAI GROUP CLASS B (TEMP) Consumer Discretionary Equity 0,01 China HKD
+MDKA MERDEKA COPPER GOLD Materials Equity 0,01 Indonesia IDR
+HFCL HFCL LTD Communication Equity 0,01 India INR
+APOLLOTYRE APOLLO TYRES LTD Consumer Discretionary Equity 0,01 India INR
+QFIN QFIN HOLDINGS ADR INC Financials Equity 0,01 China USD
+2855 PRESIDENT SECURITIES CORP Financials Equity 0,01 Taiwan TWD
+601985 CHINA NATIONAL NUCLEAR POWER LTD A Utilities Equity 0,01 China CNY
+3618 CHONGQING RURAL COMMERCIAL BANK LT Financials Equity 0,01 China HKD
+CPIN CHAROEN POKPHAND INDONESIA Consumer Staples Equity 0,01 Indonesia IDR
+IKS INVENTURUS KNOWLEDGE SOLUTIONS LTD Health Care Equity 0,01 India INR
+600887 INNER MONGOLIA YILI INDUSTRIAL GRO Consumer Staples Equity 0,01 China CNY
+CPPLUS ADITYA INFOTECH LTD Information Technology Equity 0,01 India INR
+2382 ADES HOLDING CO Energy Equity 0,01 Saudi Arabia SAR
+MEDANTA GLOBAL HEALTH LTD Health Care Equity 0,01 India INR
+2889 IBF FINANCIAL HOLDINGS LTD SHA Financials Equity 0,01 Taiwan TWD
+603288 FOSHAN HAI TIAN FLAVOURING & FOOD Consumer Staples Equity 0,01 China CNY
+6098 COUNTRY GARDEN SERVICES HOLDINGS L Real Estate Equity 0,01 China HKD
+000063 ZTE CORP A Information Technology Equity 0,01 China CNY
+000776 GF SECURITIES LTD A Financials Equity 0,01 China CNY
+AMR AMERICANA RESTAURANTS INTERNATIONA Consumer Discretionary Equity 0,01 United Arab Emirates AED
+MPHC MESAIEED PETROCHEMICAL HOLDING Materials Equity 0,01 Qatar QAR
+ACUTAAS ACUTAAS CHEMICALS LTD Health Care Equity 0,01 India INR
+2451 TRANSCEND INFORMATION INC Information Technology Equity 0,01 Taiwan TWD
+600809 SHANXI XINGHUACUN FEN WINE FACTORY Consumer Staples Equity 0,01 China CNY
+108490 ROBOTIS LTD Information Technology Equity 0,01 Korea (South) KRW
+601100 JIANGSU HENGLI HYDRAULIC LTD A Industrials Equity 0,01 China CNY
+2633 TAIWAN HIGH SPEED RAIL CORP Industrials Equity 0,01 Taiwan TWD
+6186 CHINA FEIHE LTD Consumer Staples Equity 0,01 China HKD
+VITROX VITROX CORPORATION Information Technology Equity 0,01 Malaysia MYR
+1785 SOLAR APPLIED MATERIALS TECHNOLOGY Materials Equity 0,01 Taiwan TWD
+968 XINYI SOLAR HOLDINGS LTD Information Technology Equity 0,01 China HKD
+BANPUU.R BANPU NON-VOTING DR PCL Energy Equity 0,01 Thailand THB
+""",
+
+# Page 26
+"""
+ORBIA* ORBIA ADVANCE CORP SA DE CV Materials Equity 0,01 Mexico MXN
+003690 KOREAN REINSURANCE Financials Equity 0,01 Korea (South) KRW
+9904 POU CHEN CORP Consumer Discretionary Equity 0,01 Taiwan TWD
+2228 XTALPI HOLDINGS LTD Health Care Equity 0,01 China HKD
+1212 ASTRA INDUSTRIAL GROUP Industrials Equity 0,01 Saudi Arabia SAR
+4263 SAL SAUDI LOGISTICS SERVICE CO Industrials Equity 0,01 Saudi Arabia SAR
+069960 HYUNDAI DEPARTMENT STORE LTD Consumer Discretionary Equity 0,01 Korea (South) KRW
+3MINDIA 3M INDIA LTD Industrials Equity 0,01 India INR
+SIME SIME DARBY Industrials Equity 0,01 Malaysia MYR
+1513 CHUNG-HSIN ELECTRIC & MACHINERY MF Industrials Equity 0,01 Taiwan TWD
+KPJ KPJ HEALTHCARE Health Care Equity 0,01 Malaysia MYR
+000977 INSPUR ELECTRONIC INFORMATION INDU Information Technology Equity 0,01 China CNY
+QAR QAR CASH Cash and/or Derivatives Cash 0,01 Qatar QAR
+ADRO ALAMTRI RESOURCES INDONESIA Energy Equity 0,01 Indonesia IDR
+6789 VISERA TECHNOLOGIES LTD Information Technology Equity 0,01 Taiwan TWD
+103590 ILJIN ELECTRIC LTD Industrials Equity 0,01 Korea (South) KRW
+336260 DOOSAN FUEL CELL LTD Industrials Equity 0,01 Korea (South) KRW
+2441 GREATEK ELECTRONICS INC Information Technology Equity 0,01 Taiwan TWD
+4966 PARADE TECHNOLOGIES LTD Information Technology Equity 0,01 Taiwan TWD
+GRANULES GRANULES INDIA LTD Health Care Equity 0,01 India INR
+375500 DL E&C LTD Industrials Equity 0,01 Korea (South) KRW
+TLEVISACPO GRUPO TELEVISA Communication Equity 0,01 Mexico MXN
+095340 ISC TECHNOLOGY LTD Information Technology Equity 0,01 Korea (South) KRW
+ASTERDM ASTER DM HEALTHCARE LTD Health Care Equity 0,01 India INR
+FRTKF FRONTKEN CORPORATION Industrials Equity 0,01 Malaysia MYR
+NIND NATIONAL INDUSTRIES GROUP HOLDING Industrials Equity 0,01 Kuwait KWD
+011780 KUMHO PETRO CHEMICAL LTD Materials Equity 0,01 Korea (South) KRW
+002380 KCC CORP Materials Equity 0,01 Korea (South) KRW
+KIRLOSENG KIRLOSKAR OIL ENGINES LTD Industrials Equity 0,01 India INR
+002352 S.F. HOLDING LTD A Industrials Equity 0,01 China CNY
+SAPR11 CIA SANEAMENTO DO PARANA UNITS Utilities Equity 0,01 Brazil BRL
+2162 KEYMED BIOSCIENCES INC Health Care Equity 0,01 China HKD
+1210 GREAT WALL ENTERPRISE LTD Consumer Staples Equity 0,01 Taiwan TWD
+600406 NARI TECHNOLOGY LTD A Industrials Equity 0,01 China CNY
+GCC* GRUPO CEMENTOS Materials Equity 0,01 Mexico MXN
+2380 CHINA POWER INTERNATIONAL DEVELOPM Utilities Equity 0,01 China HKD
+000792 QINGHAI SALT LAKE INDUSTRY LTD A Materials Equity 0,01 China CNY
+2015 FENG HSIN IRON & STEEL LTD Materials Equity 0,01 Taiwan TWD
+9969 INNOCARE PHARMA LTD Health Care Equity 0,01 China HKD
+271560 ORION CORP Consumer Staples Equity 0,01 Korea (South) KRW
+601818 CHINA EVERBRIGHT BANK LTD A Financials Equity 0,01 China CNY
+017800 HYUNDAI ELEVATOR LTD Industrials Equity 0,01 Korea (South) KRW
+BCP.R BANGCHAK CORPORATION ORS NON-VOTIN Energy Equity 0,01 Thailand THB
+BRES BARWA REAL ESTATE Real Estate Equity 0,01 Qatar QAR
+NEULANDLAB NEULAND LABORATORIES LTD Health Care Equity 0,01 India INR
+""",
+
+# Page 27
+"""
+004170 SHINSEGAE INC Consumer Discretionary Equity 0,01 Korea (South) KRW
+ELPE HELLENIQ ENERGY HOLDINGS S A SA Energy Equity 0,01 Greece EUR
+9945 RUENTEX DEVELOPMENT LTD Real Estate Equity 0,01 Taiwan TWD
+6282 ACBEL POLYTECH INC Industrials Equity 0,01 Taiwan TWD
+AUGO AURA MINERALS INC Materials Equity 0,01 Brazil USD
+MRDIY MR D.I.Y. GROUP (M) Consumer Discretionary Equity 0,01 Malaysia MYR
+600999 CHINA MERCHANTS SECURITIES LTD A Financials Equity 0,01 China CNY
+2467 C SUN MFG LTD Industrials Equity 0,01 Taiwan TWD
+JGS JG SUMMIT HOLDINGS INC CLASS B Industrials Equity 0,01 Philippines PHP
+440110 FADU INC Information Technology Equity 0,01 Korea (South) KRW
+SISE.E TURKIYE SISE VE CAM FABRIKALARI A Industrials Equity 0,01 Turkey TRY
+2371 TATUNG Industrials Equity 0,01 Taiwan TWD
+RATCH.R RATCH GROUP PCL NON-VOTING DR Utilities Equity 0,01 Thailand THB
+6060 ZHONGAN ONLINE P & C INSURANCE COR Financials Equity 0,01 China HKD
+ABK AL AHLI BANK Financials Equity 0,01 Kuwait KWD
+IJM IJM CORPORATION Industrials Equity 0,01 Malaysia MYR
+6414 ENNOCONN CORP Information Technology Equity 0,01 Taiwan TWD
+NATU3 NATURA SA Consumer Staples Equity 0,01 Brazil BRL
+1908 C D INTERNATIONAL INVESTMENT GROUP Real Estate Equity 0,01 China HKD
+084370 EUGENE TECHNOLOGY LTD Information Technology Equity 0,01 Korea (South) KRW
+TATAELXSI TATA ELXSI LTD Information Technology Equity 0,01 India INR
+601872 CHINA MERCHANTS ENERGY SHIPPING LT Energy Equity 0,01 China CNY
+BRAV3 BRAVA ENERGIA SA Energy Equity 0,01 Brazil BRL
+601658 POSTAL SAVINGS BANK OF CHINA LTD A Financials Equity 0,01 China CNY
+MTARTECH MTAR TECHNOLOGIES LTD Industrials Equity 0,01 India INR
+032640 LG UPLUS CORP Communication Equity 0,01 Korea (South) KRW
+600660 FUYAO GLASS INDUSTRY GROUP LTD A Consumer Discretionary Equity 0,01 China CNY
+NTC NETCARE LTD Health Care Equity 0,01 South Africa ZAR
+WELCORP WELSPUN CORP LTD Materials Equity 0,01 India INR
+9910 FENG TAY ENTERPRISES LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+TRALT.E KOZA ALTIN ISLETMELERI A Materials Equity 0,01 Turkey TRY
+CESC CESC LTD Utilities Equity 0,01 India INR
+3374 XINTEC INC Information Technology Equity 0,01 Taiwan TWD
+002938 AVARY HOLDING (SHENZHEN) LTD A Information Technology Equity 0,01 China CNY
+7202 ARABIAN INTERNET AND COMMUNICATION Information Technology Equity 0,01 Saudi Arabia SAR
+INTR INTER AND CO INC CLASS A Financials Equity 0,01 Brazil USD
+ECL ENGIE ENERGIA CHILE SA Utilities Equity 0,01 Chile CLP
+MGROS.E MIGROS TICARET A Consumer Staples Equity 0,01 Turkey TRY
+001040 CJ CORP Industrials Equity 0,01 Korea (South) KRW
+TIMKEN TIMKEN INDIA LTD Industrials Equity 0,01 India INR
+601668 CHINA STATE CONSTRUCTION ENGINEERI Industrials Equity 0,01 China CNY
+ALUP11 ALUPAR INVESTIMENTO UNITS SA Utilities Equity 0,01 Brazil BRL
+DATAPATTNS DATA PATTERNS INDIA LTD Industrials Equity 0,01 India INR
+ENRG ENERGI MEGA PERSADA Energy Equity 0,01 Indonesia IDR
+COLBUN COLBUN MACHICURA SA Utilities Equity 0,01 Chile CLP
+""",
+
+# Page 28
+"""
+600690 HAIER SMART HOME LTD A Consumer Discretionary Equity 0,01 China CNY
+TRU TRUWORTHS INTERNATIONAL LTD Consumer Discretionary Equity 0,01 South Africa ZAR
+2310 SAHARA INTERNATIONAL PETROCHEMICAL Materials Equity 0,01 Saudi Arabia SAR
+ALSEA* ALSEA DE CV Consumer Discretionary Equity 0,01 Mexico MXN
+2845 FAR EASTERN INTERNATIONAL BANK LTD Financials Equity 0,01 Taiwan TWD
+KGB KELINGTON GROUP Industrials Equity 0,01 Malaysia MYR
+9899 NETEASE CLOUD MUSIC INC Communication Equity 0,01 China HKD
+4979 LUXNET CORP Information Technology Equity 0,01 Taiwan TWD
+2380 RABIGH REFINING AND PETROCHEMICAL Energy Equity 0,01 Saudi Arabia SAR
+000938 UNISPLENDOUR CORP LTD A Information Technology Equity 0,01 China CNY
+DANA DANA GAS Energy Equity 0,01 United Arab Emirates AED
+2026 PONY AI INC Information Technology Equity 0,01 China HKD
+161890 KOLMAR KOREA LTD Consumer Staples Equity 0,01 Korea (South) KRW
+601766 CRRC CORP LTD A Industrials Equity 0,01 China CNY
+600487 HENGTONG OPTIC ELECTRIC LTD A Information Technology Equity 0,01 China CNY
+CYRE3 CYRELA BRAZIL REALTY SA Consumer Discretionary Equity 0,01 Brazil BRL
+EGIE3 ENGIE BRASIL ENERGIA SA Utilities Equity 0,01 Brazil BRL
+2096 SIMCERE PHARMACEUTICAL GROUP LTD Health Care Equity 0,01 China HKD
+1579 YIHAI INTERNATIONAL HOLDING LTD Consumer Staples Equity 0,01 China HKD
+2400 XD INC Communication Equity 0,01 China HKD
+ILC INVERSIONES LA CONSTRUCCION SA Financials Equity 0,01 Chile CLP
+371 BEIJING ENTERPRISES WATER GROUP LT Utilities Equity 0,01 China HKD
+000880 HANWHA CORP Industrials Equity 0,01 Korea (South) KRW
+145020 HUGEL INC Health Care Equity 0,01 Korea (South) KRW
+ENDURANCE ENDURANCE TECHNOLOGIES LTD Consumer Discretionary Equity 0,01 India INR
+BURSA BURSA MALAYSIA Financials Equity 0,01 Malaysia MYR
+ANGELONE ANGEL ONE LTD Financials Equity 0,01 India INR
+310210 VORONOI INC Health Care Equity 0,01 Korea (South) KRW
+HMPRO.R HOME PRODUCT CENTER NON-VOTING DR Consumer Discretionary Equity 0,01 Thailand THB
+6855 ASCENTAGE PHARMA GROUP INTERNATION Health Care Equity 0,01 China HKD
+2206 SANYANG INDUSTRY LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+098460 KOH YOUNG TECHNOLOGY INC Information Technology Equity 0,01 Korea (South) KRW
+2421 SUNONWEALTH ELECTRIC MACHINE INDUS Industrials Equity 0,01 Taiwan TWD
+600019 BAOSHAN IRON & STEEL LTD A Materials Equity 0,01 China CNY
+AEFES.E ANADOLU EFES BIRACILIK VE MALT SAN Consumer Staples Equity 0,01 Turkey TRY
+IVL.R INDORAMA VENTURES NON-VOTING DR PC Materials Equity 0,01 Thailand THB
+WOCKPHARMA WOCKHARDT LTD Health Care Equity 0,01 India INR
+CMPC EMPRESAS CMPC SA Materials Equity 0,01 Chile CLP
+MDV MODIVO SA Consumer Discretionary Equity 0,01 Poland PLN
+226950 OLIX PHARMACEUTICALS INC Health Care Equity 0,01 Korea (South) KRW
+QAMC QATAR ALUMINIUM MANUFACTURING Materials Equity 0,01 Qatar QAR
+DHBK DOHA BANK Financials Equity 0,01 Qatar QAR
+BANDHANBNK BANDHAN BANK LTD Financials Equity 0,01 India INR
+ARI AFRICAN RAINBOW MINERAL LTD Materials Equity 0,01 South Africa ZAR
+301308 SHENZHEN LONGSYS ELECTRONICS LTD A Information Technology Equity 0,01 China CNY
+""",
+
+# Page 29
+"""
+600050 CHINA UNITED NETWORK COMMUNICATION Communication Equity 0,01 China CNY
+FIVESTAR FIVE-STAR BUSINESS FINANCE LTD Financials Equity 0,01 India INR
+TAVHL.E TAV HAVALIMANLARI HOLDING A Industrials Equity 0,01 Turkey TRY
+CXSE3 CAIXA SEGURIDADE PARTICIPACOES SA Financials Equity 0,01 Brazil BRL
+454910 DOOSAN ROBOTICS INC Industrials Equity 0,01 Korea (South) KRW
+2352 QISDA CORP Information Technology Equity 0,01 Taiwan TWD
+000408 ZANGGE MINING LTD A Materials Equity 0,01 China CNY
+KRE KUWAIT REAL EST Real Estate Equity 0,01 Kuwait KWD
+TDPOWERSYS TD POWER SYSTEMS LTD Industrials Equity 0,01 India INR
+MEGACPO MEGACABLE HOLDINGS CPO Communication Equity 0,01 Mexico MXN
+GLAXO GLAXOSMITHKLINE PHARMACEUTICALS LT Health Care Equity 0,01 India INR
+1797 EAST BUY HOLDING LTD Consumer Staples Equity 0,01 China HKD
+1722 TAIWAN FERTILIZER LTD Materials Equity 0,01 Taiwan TWD
+ATHM AUTOHOME ADS REPRESENTING INC CLA Communication Equity 0,01 China USD
+3330 LINGBAO GOLD GROUP LTD H Materials Equity 0,01 China HKD
+189 DONGYUE GROUP LTD Materials Equity 0,01 China HKD
+TMGH TALAAT MOUSTAFA GROUP Real Estate Equity 0,01 Egypt EGP
+CUB CITY UNION BANK LTD Financials Equity 0,01 India INR
+8230 AL RAJHI COMPANY FOR COOPERATIVE I Financials Equity 0,01 Saudi Arabia SAR
+089030 TECHWING INC Information Technology Equity 0,01 Korea (South) KRW
+KLCC KLCC PROPERTY HOLDINGS STAPLED UNI Real Estate Equity 0,01 Malaysia MYR
+552 CHINA COMMUNICATIONS SERVICES CORP Industrials Equity 0,01 China HKD
+CPS CYFROWY POLSAT SA Communication Equity 0,01 Poland PLN
+PWL PHYSICSWALLAH LTD Consumer Discretionary Equity 0,01 India INR
+13 HUTCHMED (CHINA) LTD Health Care Equity 0,01 China HKD
+3583 SCIENTECH CORPORATION CORP Information Technology Equity 0,01 Taiwan TWD
+RAMCOCEM THE RAMCO CEMENTS LTD Materials Equity 0,01 India INR
+CEMPRO CEMINDIA PROJECTS LTD Industrials Equity 0,01 India INR
+192820 COSMAX INC Consumer Staples Equity 0,01 Korea (South) KRW
+BRAP4 BRADESPAR PREF SA Materials Equity 0,01 Brazil BRL
+3714 ENNOSTAR INC Information Technology Equity 0,01 Taiwan TWD
+2915 RUENTEX INDUSTRIES LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+SAMMAANCAP SAMMAAN CAPITAL LTD Financials Equity 0,01 India INR
+2250 SAUDI INDUSTRIAL INVESTMENT GROUP Materials Equity 0,01 Saudi Arabia SAR
+BRIGADE BRIGADE ENTERPRISES LTD Real Estate Equity 0,01 India INR
+2312 KINPO ELECTRONICS INC Information Technology Equity 0,01 Taiwan TWD
+1477 MAKALOT INDUSTRIAL LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+3030 TEST RESEARCH INC Information Technology Equity 0,01 Taiwan TWD
+SYRMA SYRMA SGS TECHNOLOGY LTD Information Technology Equity 0,01 India INR
+RIGD RELIANCE INDUSTRIES GDR REPRESENTI 144A Energy Equity 0,01 India USD
+STARHEALTH STAR HEALTH AND ALLIED INSURANCE C Financials Equity 0,01 India INR
+LALPATHLAB DR LAL PATHLABS LTD Health Care Equity 0,01 India INR
+KAJARIACER KAJARIA CERAMICS LTD Industrials Equity 0,01 India INR
+2367 GIANT BIOGENE HOLDING LTD Consumer Staples Equity 0,01 China HKD
+SIMEPROP SIME DARBY PROPERTY Real Estate Equity 0,01 Malaysia MYR
+""",
+
+# Page 30
+"""
+CARTRADE CARTRADE TECH LTD Consumer Discretionary Equity 0,01 India INR
+JFC JOLLIBEE FOODS CORP Consumer Discretionary Equity 0,01 Philippines PHP
+300033 HITHINK ROYALFLUSH INFORMATION NET Financials Equity 0,01 China CNY
+002001 ZHEJIANG NHU LTD A Materials Equity 0,01 China CNY
+ALTIJARIA COMMERCIAL REAL ESTATE Real Estate Equity 0,01 Kuwait KWD
+BPCC BOUBYAN PETROCHM Materials Equity 0,01 Kuwait KWD
+ABMB ALLIANCE BANK MALAYSIA BHD Financials Equity 0,01 Malaysia MYR
+KTC.R KRUNGTHAI CARD NON-VOTING DR PCL Financials Equity 0,01 Thailand THB
+000988 HUAGONG TECH LTD A Information Technology Equity 0,01 China CNY
+688347 HUA HONG GRACE SEMICONDUCTOR LTD A Information Technology Equity 0,01 China CNY
+601628 CHINA LIFE INSURANCE LTD A Financials Equity 0,01 China CNY
+EQU EQUITES PROP FUND LTD Real Estate Equity 0,01 South Africa ZAR
+NUVAMA NUVAMA WEALTH MANAGEMENT LTD Financials Equity 0,01 India INR
+MSUMI MOTHERSON SUMI WIRING INDIA LTD Consumer Discretionary Equity 0,01 India INR
+8039 TAIFLEX SCIENTIFIC LTD Information Technology Equity 0,01 Taiwan TWD
+600160 ZHEJIANG JU HUA LTD A Materials Equity 0,01 China CNY
+603501 OMNIVISION INTEGRATED CIRCUITS GRO Information Technology Equity 0,01 China CNY
+139480 E-MART INC Consumer Staples Equity 0,01 Korea (South) KRW
+BOLSAA BOLSA MEXICANA DE VALORES Financials Equity 0,01 Mexico MXN
+204320 HL MANDO CORP Consumer Discretionary Equity 0,01 Korea (South) KRW
+VIO VIOHALCO SA Materials Equity 0,01 Greece EUR
+GENTING GENTING Consumer Discretionary Equity 0,01 Malaysia MYR
+489790 HANWHA VISION LTD Information Technology Equity 0,01 Korea (South) KRW
+3376 SHIN ZU SHING LTD Industrials Equity 0,01 Taiwan TWD
+000568 LUZHOU LAO JIAO LTD A Consumer Staples Equity 0,01 China CNY
+601600 ALUMINUM CORPORATION OF CHINA LTD Materials Equity 0,01 China CNY
+TATATECH TATA TECHNOLOGIES LTD Information Technology Equity 0,01 India INR
+7030 MOBILE TELECOMMUNICATIONS Communication Equity 0,01 Saudi Arabia SAR
+AGUAS.A AGUAS ANDINAS SA Utilities Equity 0,01 Chile CLP
+3005 GETAC HOLDINGS CORP Information Technology Equity 0,01 Taiwan TWD
+601066 CHINA SECURITIES LTD A Financials Equity 0,01 China CNY
+INL INVESTEC LTD Financials Equity 0,01 South Africa ZAR
+SCGP.R SCG PACKAGING PCL NON-VOTING DR Materials Equity 0,01 Thailand THB
+VNET VNET GROUP ADR INC Information Technology Equity 0,01 China USD
+1066 SHANDONG WEIGAO GP MEDICAL POLYMER Health Care Equity 0,01 China HKD
+601169 BANK OF BEIJING LTD A Financials Equity 0,01 China CNY
+005290 DONGJIN SEMICHEM LTD Materials Equity 0,01 Korea (South) KRW
+TKG TELKOM SOC LTD SA Communication Equity 0,01 South Africa ZAR
+NBCC NBCC INDIA LTD Industrials Equity 0,01 India INR
+GGPS3 GPS PARTICIPACOES E EMPREENDIMENTO Industrials Equity 0,01 Brazil BRL
+3090 NICHIDENBO CORP Information Technology Equity 0,01 Taiwan TWD
+POONAWALLA POONAWALLA FINCORP LTD Financials Equity 0,01 India INR
+1164 CGN MINING COMPANY LTD Energy Equity 0,01 China HKD
+600016 CHINA MINSHENG BANKING CORP LTD A Financials Equity 0,01 China CNY
+TU.R THAI UNION GROUP NON-VOTING DR PCL Consumer Staples Equity 0,01 Thailand THB
+""",
+
+# Page 31
+"""
+600089 TBEA LTD A Industrials Equity 0,01 China CNY
+067310 HANA MICRON INC Information Technology Equity 0,01 Korea (South) KRW
+601009 BANK OF NANJING LTD A Financials Equity 0,01 China CNY
+6116 HANNSTAR DISPLAY CORP Information Technology Equity 0,01 Taiwan TWD
+001309 SHENZHEN TECHWINSEMI TECHNOLOGY LT Information Technology Equity 0,01 China CNY
+CPFE3 CPFL ENERGIA SA Utilities Equity 0,01 Brazil BRL
+097950 CJ CHEILJEDANG CORP Consumer Staples Equity 0,01 Korea (South) KRW
+TFG THE FOSCHINI GROUP LTD Consumer Discretionary Equity 0,01 South Africa ZAR
+631 SANY HEAVY EQUIPMENT INTERNATIONAL Industrials Equity 0,01 China HKD
+NMDCENR NMDC ENERGY PJSC Energy Equity 0,01 United Arab Emirates AED
+000425 XCMG CONSTRUCTION MACHINERY LTD A Industrials Equity 0,01 China CNY
+2270 SAUDI DAIRY AND FOODSTUFF Consumer Staples Equity 0,01 Saudi Arabia SAR
+IGBREIT IGB REITS UNITS TRUST Real Estate Equity 0,01 Malaysia MYR
+688506 SICHUAN BIOKIN PHARMACEUTICAL LTD Health Care Equity 0,01 China CNY
+DRD DRDGOLD LTD Materials Equity 0,01 South Africa ZAR
+PSSA3 PORTO SEGURO SA Financials Equity 0,01 Brazil BRL
+000657 CHINA TUNGSTEN AND HIGHTECH MATERI Materials Equity 0,01 China CNY
+688361 SKYVERSE TECHNOLOGY LTD A Information Technology Equity 0,01 China CNY
+354 CHINASOFT INTERNATIONAL LTD Information Technology Equity 0,01 China HKD
+4004 DALLAH HEALTHCARE Health Care Equity 0,01 Saudi Arabia SAR
+2367 UNITECH PRINTED CIRCUIT BOARD CORP Information Technology Equity 0,01 Taiwan TWD
+AWL AWL AGRI BUSINESS LTD Consumer Staples Equity 0,01 India INR
+IIFL IIFL FINANCE LTD Financials Equity 0,01 India INR
+MTH MOTUS HOLD LTD SHS Consumer Discretionary Equity 0,01 South Africa ZAR
+600926 BANK OF HANGZHOU LTD A Financials Equity 0,01 China CNY
+NATCOPHARM NATCO PHARMA LTD Health Care Equity 0,01 India INR
+KCE.R KCE ELECTRONICS NON-VOTING DR PCL Information Technology Equity 0,01 Thailand THB
+BLUESTONE BLUESTONE JEWELLERY AND LIFESTYLE Consumer Discretionary Equity 0,01 India INR
+SIB SHARJAH ISLAMIC BANK Financials Equity 0,01 United Arab Emirates AED
+MXN MXN CASH Cash and/or Derivatives Cash 0,01 Mexico MXN
+GPSC.R GLOBAL POWER SYNERGY PCL NON-VOTIN Utilities Equity 0,01 Thailand THB
+KKP.R KIATNAKIN PHATRA BANK NON-VOTING D Financials Equity 0,01 Thailand THB
+6682 PHANCY GROUP LTD H Information Technology Equity 0,01 China HKD
+081660 MISTO HOLDINGS CORP Consumer Discretionary Equity 0,01 Korea (South) KRW
+1810 SEERA GROUP HOLDING Consumer Discretionary Equity 0,01 Saudi Arabia SAR
+BALRAMCHIN BALRAMPUR CHINI MILLS LTD Consumer Staples Equity 0,01 India INR
+1815 FULLTECH FIBER GLASS CORP Information Technology Equity 0,01 Taiwan TWD
+546 FUFENG GROUP LTD Materials Equity 0,01 China HKD
+ITCHOTELS ITC HOTELS LTD Consumer Discretionary Equity 0,01 India INR
+9933 CTCI Industrials Equity 0,01 Taiwan TWD
+SMFT3 SMARTFIT ESCOLA DE GINASTICA E DAN Consumer Discretionary Equity 0,01 Brazil BRL
+8028 PHOENIX SILICON INTERNATIONAL CORP Information Technology Equity 0,01 Taiwan TWD
+PGAS PERUSAHAAN GAS NEGARA Utilities Equity 0,01 Indonesia IDR
+2386 SINOPEC ENGINEERING GROUP LTD H H Industrials Equity 0,01 China HKD
+696 TRAVELSKY TECHNOLOGY LTD H Consumer Discretionary Equity 0,01 China HKD
+""",
+
+# Page 32
+"""
+600886 SDIC POWER HOLDINGS LTD A Utilities Equity 0,01 China CNY
+600905 CHINA THREE GORGES RENEWABLES(GROU Utilities Equity 0,01 China CNY
+3339 LONKING HOLDINGS LTD Industrials Equity 0,01 China HKD
+600522 JIANGSU ZHONGTIAN TECHNOLOGY LTD A Industrials Equity 0,01 China CNY
+2357 AVICHINA INDUSTRY & TECHNOLOGY LTD Industrials Equity 0,01 China HKD
+BHW BANK HANDLOWY W WARSZAWIE SA Financials Equity 0,01 Poland PLN
+6290 LONGWELL Industrials Equity 0,01 Taiwan TWD
+GODFRYPHLP GODFREY PHILLIPS INDIA LTD Consumer Staples Equity 0,01 India INR
+ATUL ATUL LTD Materials Equity 0,01 India INR
+600111 CHINA NORTHERN RARE EARTH (GROUP) Materials Equity 0,01 China CNY
+EGCO.R ELECTRICITY GENERATING NON-VOTING Utilities Equity 0,01 Thailand THB
+3035 FARADAY TECHNOLOGY CORP Information Technology Equity 0,01 Taiwan TWD
+SNT SANTAM LTD Financials Equity 0,01 South Africa ZAR
+1866 CHINA XLX FERTILISER LTD Materials Equity 0,01 China HKD
+1833 PING AN HEALTHCARE AND TECHNOLOGY Consumer Staples Equity 0,01 China HKD
+IGL INDRAPRASTHA GAS LTD Utilities Equity 0,01 India INR
+002281 ACCELINK TECHNOLOGIES LTD A Information Technology Equity 0,01 China CNY
+FORCEMOT FORCE MOTORS LTD Industrials Equity 0,01 India INR
+KPITTECH KPIT TECHNOLOGIES LTD Information Technology Equity 0,01 India INR
+SAUD3 BRADSAUDE SA Health Care Equity 0,01 Brazil BRL
+140410 MEZZION PHARMA LTD Health Care Equity 0,01 Korea (South) KRW
+AADI ADARO ANDALAN INDONESIA Energy Equity 0,01 Indonesia IDR
+JSE JOHANNESBURG STOCK EXCHANGE LTD Financials Equity 0,01 South Africa ZAR
+ANTHEM ANTHEM BIOSCIENCES LTD Health Care Equity 0,01 India INR
+COGN3 COGNA EDUCACAO SA Consumer Discretionary Equity 0,01 Brazil BRL
+6781 ADVANCED ENERGY SOLUTION HOLDING L Industrials Equity 0,01 Taiwan TWD
+028670 PAN OCEAN LTD Industrials Equity 0,01 Korea (South) KRW
+2646 STARLUX AIRLINES LTD Industrials Equity 0,01 Taiwan TWD
+002648 SATELLITE CHEMICAL LTD A Materials Equity 0,01 China CNY
+3042 TXC CORP Information Technology Equity 0,01 Taiwan TWD
+008770 HOTEL SHILLA LTDINARY SHARES KOREA Consumer Discretionary Equity 0,01 Korea (South) KRW
+071970 HD-HYUNDAI MARINE ENGINE LTD Industrials Equity 0,01 Korea (South) KRW
+600010 INNER MONGOLIA BAOTOU STEEL UNION Materials Equity 0,01 China CNY
+817 CHINA JINMAO HOLDINGS GROUP LTD Real Estate Equity 0,01 China HKD
+ZEEL ZEE ENTERTAINMENT ENTERPRISES LTD Communication Equity 0,01 India INR
+PPLPHARMA PIRAMAL PHARMA LTD Health Care Equity 0,01 India INR
+2498 HTC CORP Information Technology Equity 0,01 Taiwan TWD
+3393 WASION HOLDINGS LTD Information Technology Equity 0,01 China HKD
+URC UNIVERSAL ROBINA CORP Consumer Staples Equity 0,01 Philippines PHP
+8313 RASAN INFORMATION TECHNOLOGY Financials Equity 0,01 Saudi Arabia SAR
+1681 CONSUN PHARMACEUTICAL GROUP LTD Health Care Equity 0,01 China HKD
+MPI MALAYSIAN PACIFIC INDUSTRIES Information Technology Equity 0,01 Malaysia MYR
+2252 SHANGHAI MICROPORT MEDBOT CLASS H Health Care Equity 0,01 China HKD
+MAPI MITRA ADIPERKASA Consumer Discretionary Equity 0,01 Indonesia IDR
+300604 HANGZHOU CHANG CHUAN TECHNOLOGY LT Information Technology Equity 0,01 China CNY
+""",
+
+# Page 33
+"""
+002230 IFLYTEK LTD A Information Technology Equity 0,01 China CNY
+088350 HANWHA LIFE INSURANCE LTD Financials Equity 0,01 Korea (South) KRW
+AARTIIND AARTI INDUSTRIES LTD Materials Equity 0,01 India INR
+CRC.R CENTRAL RETAIL CORPORATION PCL NON Consumer Discretionary Equity 0,01 Thailand THB
+CZK CZK CASH Cash and/or Derivatives Cash 0,01 Czech Republic CZK
+CARBORUNIV CARBORUNDUM UNIVERSAL LTD Materials Equity 0,01 India INR
+GLAND GLAND PHARMA LTD Health Care Equity 0,01 India INR
+383220 F&F LTD Consumer Discretionary Equity 0,01 Korea (South) KRW
+2838 UNION BANK OF TAIWAN Financials Equity 0,01 Taiwan TWD
+2481 PAN JIT INTERNATIONAL INC Information Technology Equity 0,01 Taiwan TWD
+601868 CHINA ENERGY ENGINEERING CORP LTD Industrials Equity 0,01 China CNY
+1314 CHINA PETROCHEMICAL DEVELOPMENT CO Materials Equity 0,01 Taiwan TWD
+1321 EAST PIPES INTEGRATED COMPANY FOR Materials Equity 0,01 Saudi Arabia SAR
+9939 TAIWAN HON CHUAN ENTERPRISE LTD Materials Equity 0,01 Taiwan TWD
+600015 HUA XIA BANK LTD A Financials Equity 0,01 China CNY
+688521 VERISILICON MICROELECTRONICS (SHAN Information Technology Equity 0,01 China CNY
+035900 JYP ENTERTAINMENT CORPORATION CORP Communication Equity 0,01 Korea (South) KRW
+4123 CENTER LABORATORIES INC Health Care Equity 0,01 Taiwan TWD
+2230 SAUDI CHEMICAL Health Care Equity 0,01 Saudi Arabia SAR
+IREDA INDIAN RENEWABLE ENERGY DEVELOPMEN Financials Equity 0,01 India INR
+300857 SHARETRONIC DATA TECHNOLOGY LTD A Information Technology Equity 0,01 China CNY
+000630 TONGLING NONFERROUS METALS GROUP L Materials Equity 0,01 China CNY
+TGA THUNGELA RESOURCES LTD Energy Equity 0,01 South Africa ZAR
+2350 SAUDI KAYAN PETROCHEMICAL Materials Equity 0,01 Saudi Arabia SAR
+035250 KANGWON LAND INC Consumer Discretionary Equity 0,01 Korea (South) KRW
+ZETRIX ZETRIX AI Industrials Equity 0,01 Malaysia MYR
+3396 LEGEND HOLDINGS CORP H Information Technology Equity 0,01 China HKD
+002460 GANFENG LITHIUM GROUP LTD A Materials Equity 0,01 China CNY
+GABRIEL GABRIEL INDIA LTD Consumer Discretionary Equity 0,01 India INR
+688525 BIWIN STORAGE TECHNOLOGY LTD A Information Technology Equity 0,01 China CNY
+ALPEKA ALPEK SA DE CV Materials Equity 0,01 Mexico MXN
+772 CHINA LITERATURE LTD Communication Equity 0,01 China HKD
+AKTR AKTOR SA HOLDING COMPANY TECHNICAL Industrials Equity 0,01 Greece EUR
+POMO4 MARCOPOLO PREF SA Industrials Equity 0,01 Brazil BRL
+IEYHO.E ISSIKLAR ENERJI YAPI HOLDING A Consumer Discretionary Equity 0,01 Turkey TRY
+GUJENERGY GUJARAT ENERGY LTD Utilities Equity 0,01 India INR
+3413 FOXSEMICON INTEGRATED TECHNOLOGY I Information Technology Equity 0,01 Taiwan TWD
+DEEPAKNTR DEEPAK NITRITE LTD Materials Equity 0,01 India INR
+601229 BANK OF SHANGHAI LTD A Financials Equity 0,01 China CNY
+3320 CHINA RESOURCES PHARMACEUTICAL GRO Health Care Equity 0,01 China HKD
+BOX BOXER RETAIL LTD Consumer Staples Equity 0,01 South Africa ZAR
+257720 SILICON2 LTD Consumer Discretionary Equity 0,01 Korea (South) KRW
+ELGIEQUIP ELGI EQUIPMENTS LTD Industrials Equity 0,01 India INR
+EMMVEE EMMVEE PHOTOVOLTAIC POWER LTD Information Technology Equity 0,01 India INR
+1907 YFY INC Materials Equity 0,01 Taiwan TWD
+""",
+
+# Page 34
+"""
+052690 KEPCO ENGINEERING & CONSTRUCTION I Industrials Equity 0,01 Korea (South) KRW
+6176 RADIANT OPTO-ELECTRONICS CORP Information Technology Equity 0,01 Taiwan TWD
+SKFINDUS SKF INDIA (INDUSTRIAL) LTD Industrials Equity 0,01 India INR
+3020 YAMAMA SAUDI CEMENT Materials Equity 0,01 Saudi Arabia SAR
+600795 GD POWER DEVELOPMENT LTD A Utilities Equity 0,01 China CNY
+001120 LX INTERNATIONAL CORP Industrials Equity 0,01 Korea (South) KRW
+030000 CHEIL WORLDWIDE INC Communication Equity 0,01 Korea (South) KRW
+023530 LOTTE SHOPPING LTD Consumer Discretionary Equity 0,01 Korea (South) KRW
+SANSERA SANSERA ENGINEERING LTD Consumer Discretionary Equity 0,01 India INR
+4003 UNITED ELECTRONICS Consumer Discretionary Equity 0,01 Saudi Arabia SAR
+TENNIND TENNECO CLEAN AIR INDIA LTD Consumer Discretionary Equity 0,01 India INR
+3563 MACHVISION INC Information Technology Equity 0,01 Taiwan TWD
+ARVIND ARVIND LTD Consumer Discretionary Equity 0,01 India INR
+688702 SUZHOU CENTEC COMMUNICATIONS LTD A Information Technology Equity 0,01 China CNY
+300014 EVE ENERGY LTD A Industrials Equity 0,01 China CNY
+600346 HENGLI PETROCHEMICAL LTD A Materials Equity 0,01 China CNY
+KLBF KALBE FARMA Health Care Equity 0,01 Indonesia IDR
+601688 HUATAI SECURITIES LTD A Financials Equity 0,01 China CNY
+IGTI11 IGUATEMI UNIT SA Real Estate Equity 0,01 Brazil BRL
+2504 GOLDSUN BUILDING MATERIALS LTD Materials Equity 0,01 Taiwan TWD
+2006 TUNG HO STEEL ENTERPRISE CORP Materials Equity 0,01 Taiwan TWD
+BELRISE BELRISE INDUSTRIES LTD Consumer Discretionary Equity 0,01 India INR
+357780 SOULBRAIN LTD Materials Equity 0,01 Korea (South) KRW
+AFFLE AFFLE I LTD Communication Equity 0,01 India INR
+LH.R LAND AND HOUSE PUBLIC NON-VOTING D Real Estate Equity 0,01 Thailand THB
+004800 HYOSUNG CORP Industrials Equity 0,01 Korea (South) KRW
+1795 LOTUS PHARMACEUTICAL LTD Health Care Equity 0,01 Taiwan TWD
+JUBLPHARMA JUBILANT PHARMOVA LTD Health Care Equity 0,01 India INR
+KAYNES KAYNES TECHNOLOGY INDIA LTD Information Technology Equity 0,01 India INR
+007390 NATURECELL LTD Health Care Equity 0,01 Korea (South) KRW
+2050 SAVOLA GROUP Consumer Staples Equity 0,01 Saudi Arabia SAR
+ABREL ADITYA BIRLA REAL ESTATE LTD Real Estate Equity 0,01 India INR
+6191 GLOBAL BRANDS MANUFACTURE LTD Information Technology Equity 0,01 Taiwan TWD
+TATACHEM TATA CHEMICALS LTD Materials Equity 0,01 India INR
+EMPOWER EMIRATES CENTRAL COOLING SYSTEMS C Utilities Equity 0,01 United Arab Emirates AED
+EKGYO.E EMLAK KONUT GAYRIMENKUL YATIRIM OR Real Estate Equity 0,01 Turkey TRY
+ZENTEC ZEN TECHNOLOGIES LTD Industrials Equity 0,01 India INR
+1952 EVEREST MEDICINES LTD Health Care Equity 0,01 China HKD
+2329 ORIENT SEMICONDUCTOR ELECTRONICS L Information Technology Equity 0,01 Taiwan TWD
+601888 CHINA TOURISM GROUP DUTY FREE CORP Consumer Discretionary Equity 0,01 China CNY
+BUMI BUMI RESOURCES Energy Equity 0,01 Indonesia IDR
+688249 NEXCHIP SEMICONDUCTOR CORP A Information Technology Equity 0,01 China CNY
+PRIVISCL PRIVI SPECIALITY CHEMICALS LTD Materials Equity 0,01 India INR
+FSL FIRSTSOURCE SOLUTIONS LTD Industrials Equity 0,01 India INR
+LHC LIFE HEALTH LTD Health Care Equity 0,01 South Africa ZAR
+""",
+
+# Page 35
+"""
+9985 WEILONG DELICIOUS GLOBAL HOLDINGS Consumer Staples Equity 0,01 China HKD
+CSAN3 COSAN INDUSTRIA E COMERCIO SA Consumer Discretionary Equity 0,01 Brazil BRL
+002653 HAISCO PHARMACEUTICAL GROUP LTD A Health Care Equity 0,01 China CNY
+601336 NEW CHINA LIFE INSURANCE LTD A Financials Equity 0,01 China CNY
+ASTRAMICRO ASTRA MICROWAVE PRODUCTS LTD Information Technology Equity 0,01 India INR
+2869 GREENTOWN SERVICE GROUP LTD Real Estate Equity 0,01 China HKD
+EMAMILTD EMAMI LTD Consumer Staples Equity 0,01 India INR
+CCU COMPANIA CERVECERIAS UNIDAS SA Consumer Staples Equity 0,01 Chile CLP
+152 SHENZHEN INTERNATIONAL HOLDINGS LT Industrials Equity 0,01 China HKD
+011170 LOTTE CHEMICAL CORP Materials Equity 0,01 Korea (South) KRW
+600674 SICHUAN CHUANTOU ENERGY LTD A Utilities Equity 0,01 China CNY
+601012 LONGI GREEN ENERGY TECHNOLOGY LTD Information Technology Equity 0,01 China CNY
+237690 ST PHARM LTD Health Care Equity 0,01 Korea (South) KRW
+AXREIT AXIS REITS UNITS TRUST Real Estate Equity 0,01 Malaysia MYR
+002602 ZHEJIANG CENTURY HUATATONG GROUP LTD Communication Equity 0,01 China CNY
+HONAUT HONEYWELL AUTOMATION INDIA LTD Information Technology Equity 0,01 India INR
+3900 GREENTOWN CHINA LTD Real Estate Equity 0,01 China HKD
+2083 POWER AND WATER UTILITY COMPANY FO Utilities Equity 0,01 Saudi Arabia SAR
+688126 NATIONAL SILICON INDUSTRY GROUP LT Information Technology Equity 0,01 China CNY
+5904 POYA LTD Consumer Discretionary Equity 0,01 Taiwan TWD
+PREMIERENE PREMIER ENERGIES LTD Information Technology Equity 0,01 India INR
+HEXW HEXAWARE TECHNOLOGIES LTD Information Technology Equity 0,01 India INR
+483650 DALBA GLOBAL LTD Consumer Staples Equity 0,01 Korea (South) KRW
+PTRO PETROSEA Materials Equity 0,01 Indonesia IDR
+3715 DYNAMIC HOLDING LTD Information Technology Equity 0,01 Taiwan TWD
+4763 JINAN ACETATE CHEMICAL LTD Materials Equity 0,01 Taiwan TWD
+TOPGLOV TOP GLOVE CORPORATION Health Care Equity 0,01 Malaysia MYR
+688120 HWATSING TECHNOLOGY LTD A Information Technology Equity 0,01 China CNY
+000807 YUNNAN ALUMINIUM LTD A Materials Equity 0,01 China CNY
+2486 I-CHIUN PRECISION INDUSTRY LTD Information Technology Equity 0,01 Taiwan TWD
+CHAMBLFERT CHAMBAL FERTILISERS AND CHEMICALS Materials Equity 0,01 India INR
+512 GRAND PHARMACEUTICAL GROUP LTD Health Care Equity 0,01 China HKD
+1409 SHINKONG SYNTHETIC FIBERS CORP Materials Equity 0,01 Taiwan TWD
+MBK.R MBK NON-VOTING DR PCL Real Estate Equity 0,01 Thailand THB
+012750 S-1 CORP Industrials Equity 0,01 Korea (South) KRW
+COP COP CASH Cash and/or Derivatives Cash 0,01 Colombia COP
+347850 D&D PHARMATECH INC Health Care Equity 0,01 Korea (South) KRW
+UNIP6 UNIPAR PARTICIPACOES PREF CLASS B Materials Equity 0,01 Brazil BRL
+ORAS ORASCOM CONSTRUCTION PLC Industrials Equity 0,01 Egypt EGP
+BAATABAK PHILIP MORRIS Consumer Staples Equity 0,01 Czech Republic CZK
+601881 CHINA GALAXY SECURITIES LTD A Financials Equity 0,01 China CNY
+ETEL TELECOM EGYPT Communication Equity 0,01 Egypt EGP
+MTC.R MUANGTHAI CAPITAL ORS NON-VOTING D Financials Equity 0,01 Thailand THB
+TCAP.R THANACHART CAPITAL NON-VOTING DR P Financials Equity 0,01 Thailand THB
+JINDALSAW JINDAL SAW LTD Materials Equity 0,01 India INR
+"""
+]

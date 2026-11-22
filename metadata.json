@@ -1,0 +1,8 @@
+{
+  "name": "InvestAI - Tracker Portofoliu",
+  "description": "Un tracker avansat pentru gestionarea a trei portofolii de investiții distincte, cu analiză financiară detaliată și recomandări generate de inteligența artificială Gemini.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

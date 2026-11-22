@@ -1,0 +1,76 @@
+// Holdings dataset for Amundi Euro Government Bond 0-6 M UCITS ETF Acc (C3M.PA / ISIN: FR0010754200)
+import { ETFHolding } from './meudHoldings';
+
+export const C3M_FULL_HOLDINGS: ETFHolding[] = [
+  { symbol: "DE000BU0E337", name: "FEDERAL REPUB TBIP % 16Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 3.29, location: "Germany", currency: "EUR" },
+  { symbol: "DE000BU0E329", name: "FEDERAL REPUB TBIP % 19Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 3.18, location: "Germany", currency: "EUR" },
+  { symbol: "DE000BU0E345", name: "FEDERAL REPUB TBIP % 14Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.93, location: "Germany", currency: "EUR" },
+  { symbol: "DE000BU0E360", name: "FEDERAL REPUB TBIP % 13Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.56, location: "Germany", currency: "EUR" },
+  { symbol: "IT0005692485", name: "REPUBLIC OF I BOT % 31Jul26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.55, location: "Italy", currency: "EUR" },
+  { symbol: "IT0005702656", name: "REPUBLIC OF I BOT % 30Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.50, location: "Italy", currency: "EUR" },
+  { symbol: "FR0129132736", name: "FRENCH REPUBL BTF % 12Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.49, location: "France", currency: "EUR" },
+  { symbol: "DE000BU0E352", name: "FEDERAL REPUB TBIP % 18Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.46, location: "Germany", currency: "EUR" },
+  { symbol: "FR0129287316", name: "FRENCH REPUBL BTF % 07Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.36, location: "France", currency: "EUR" },
+  { symbol: "ES0L02610092", name: "KINGDOM OF SP TBIP % 09Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.34, location: "Spain", currency: "EUR" },
+  { symbol: "FR0129132744", name: "FRENCH REPUBL BTF % 09Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.33, location: "France", currency: "EUR" },
+  { symbol: "IT0005674335", name: "REPUBLIC OF I BOT % 14Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.32, location: "Italy", currency: "EUR" },
+  { symbol: "IT0005684888", name: "REPUBLIC OF I BOT % 14Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.31, location: "Italy", currency: "EUR" },
+  { symbol: "FR0129437556", name: "FRENCH REPUBL BTF % 26Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.17, location: "France", currency: "EUR" },
+  { symbol: "FR0129437564", name: "FRENCH REPUBL BTF % 23Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.15, location: "France", currency: "EUR" },
+  { symbol: "IT0005711749", name: "REPUBLIC OF I BOT % 30Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.13, location: "Italy", currency: "EUR" },
+  { symbol: "IT0005669269", name: "REPUBLIC OF I BOT % 14Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.12, location: "Italy", currency: "EUR" },
+  { symbol: "FR0129570596", name: "FRENCH REPUBL BTF % 18Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.10, location: "France", currency: "EUR" },
+  { symbol: "IT0005666851", name: "REPUBLIC OF I BOT % 14Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.07, location: "Italy", currency: "EUR" },
+  { symbol: "IT0005689887", name: "REPUBLIC OF I BOT % 14Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.05, location: "Italy", currency: "EUR" },
+  { symbol: "BE0312816888", name: "KINGDOM OF BE % 10Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.05, location: "Belgium", currency: "EUR" },
+  { symbol: "ES0L02608070", name: "KINGDOM OF SP TBIP % 07Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.04, location: "Spain", currency: "EUR" },
+  { symbol: "ES0L02609045", name: "KINGDOM OF SP TBIP % 04Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.02, location: "Spain", currency: "EUR" },
+  { symbol: "FR0129570604", name: "FRENCH REPUBL BTF % 16Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.01, location: "France", currency: "EUR" },
+  { symbol: "FR0129570588", name: "FRENCH REPUBL BTF % 21Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 2.01, location: "France", currency: "EUR" },
+  { symbol: "IT0005678492", name: "REPUBLIC OF I BOT % 13Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.99, location: "Italy", currency: "EUR" },
+  { symbol: "FR0129287332", name: "FRENCH REPUBL BTF % 02Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.94, location: "France", currency: "EUR" },
+  { symbol: "FR0129287324", name: "FRENCH REPUBL BTF % 04Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.94, location: "France", currency: "EUR" },
+  { symbol: "ES0L02612049", name: "KINGDOM OF SP TBIP % 04Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.91, location: "Spain", currency: "EUR" },
+  { symbol: "ES0L02611066", name: "KINGDOM OF SP TBIP % 06Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.90, location: "Spain", currency: "EUR" },
+  { symbol: "ES0L02701156", name: "KINGDOM OF SP TBIP % 15Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.87, location: "Spain", currency: "EUR" },
+  { symbol: "FR0129570570", name: "FRENCH REPUBL BTF % 30Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.82, location: "France", currency: "EUR" },
+  { symbol: "FR0129287340", name: "FRENCH REPUBL BTF % 30Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.80, location: "France", currency: "EUR" },
+  { symbol: "NL0015073UH9", name: "GOVERNMENT OF % 30Jul26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.76, location: "Netherlands", currency: "EUR" },
+  { symbol: "BE0312817894", name: "KINGDOM OF BE % 15Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.76, location: "Belgium", currency: "EUR" },
+  { symbol: "DE000BU0E378", name: "FEDERAL REPUB TBIP % 09Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.64, location: "Germany", currency: "EUR" },
+  { symbol: "BE0312815872", name: "KINGDOM OF BE % 13Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.60, location: "Belgium", currency: "EUR" },
+  { symbol: "FR0129570539", name: "FRENCH REPUBL BTF % 05Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.58, location: "France", currency: "EUR" },
+  { symbol: "FR0129570562", name: "FRENCH REPUBL BTF % 16Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.57, location: "France", currency: "EUR" },
+  { symbol: "FR0129570554", name: "FRENCH REPUBL BTF % 02Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.54, location: "France", currency: "EUR" },
+  { symbol: "FR0129570547", name: "FRENCH REPUBL BTF % 19Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.53, location: "France", currency: "EUR" },
+  { symbol: "FR0129704203", name: "FRENCH REPUBL BTF % 14Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.49, location: "France", currency: "EUR" },
+  { symbol: "NL00150740W0", name: "GOVERNMENT OF % 29Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.42, location: "Netherlands", currency: "EUR" },
+  { symbol: "NL0015073VU0", name: "GOVERNMENT OF % 28Aug26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.38, location: "Netherlands", currency: "EUR" },
+  { symbol: "FR0129570612", name: "FRENCH REPUBL BTF % 13Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.36, location: "France", currency: "EUR" },
+  { symbol: "NL00150742K1", name: "GOVERNMENT OF % 29Oct26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.17, location: "Netherlands", currency: "EUR" },
+  { symbol: "IT0005719536", name: "REPUBLIC OF I BOT % 31Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.09, location: "Italy", currency: "EUR" },
+  { symbol: "BE0312818900", name: "KINGDOM OF BE % 12Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.08, location: "Belgium", currency: "EUR" },
+  { symbol: "BE0312820922", name: "KINGDOM OF BE % 14Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.08, location: "Belgium", currency: "EUR" },
+  { symbol: "BE0312819916", name: "KINGDOM OF BE % 10Dec26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 1.05, location: "Belgium", currency: "EUR" },
+  { symbol: "NL00150744Z5", name: "GOVERNMENT OF % 27Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 0.67, location: "Netherlands", currency: "EUR" },
+  { symbol: "PTPBTZGE0032", name: "PORTUGAL TBIP % 22Jan27", sector: "Government Bonds", assetClass: "Fixed Income", weight: 0.57, location: "Portugal", currency: "EUR" },
+  { symbol: "PTPBTCGE0070", name: "PORTUGAL TBIP % 20Nov26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 0.54, location: "Portugal", currency: "EUR" },
+  { symbol: "PTPBTAGE0072", name: "PORTUGAL TBIP % 18Sep26", sector: "Government Bonds", assetClass: "Fixed Income", weight: 0.43, location: "Portugal", currency: "EUR" },
+  { symbol: "_CURRENCYEUR", name: "Cash and Cash Equivalent", sector: "Cash & Derivatives", assetClass: "Cash", weight: -0.01, location: "Eurozone", currency: "EUR" }
+];
+
+export const C3M_SECTOR_ALLOCATIONS = [
+  { name: "Government Bonds / Eurozone Sovereign", weight: 100.01 },
+  { name: "Cash and/or Derivatives", weight: -0.01 }
+];
+
+export const C3M_COUNTRY_ALLOCATIONS = [
+  { name: "France", weight: 34.09 },
+  { name: "Italy", weight: 21.13 },
+  { name: "Germany", weight: 16.06 },
+  { name: "Spain", weight: 12.08 },
+  { name: "Belgium", weight: 8.62 },
+  { name: "Netherlands", weight: 6.40 },
+  { name: "Portugal", weight: 1.54 },
+  { name: "Eurozone / Cash", weight: -0.01 }
+];

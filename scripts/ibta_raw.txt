@@ -1,0 +1,101 @@
+raw_text = """
+TNOTE TREASURY NOTE Treasury Fixed Income 2,31 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,45 United States 4,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,44 United States 4,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,43 United States 3,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,40 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,40 United States 3,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,40 United States 4,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,39 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,39 United States 3,38 USD
+TNOTE TREASURY NOTE (OLD) Treasury Fixed Income 1,38 United States 4,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,37 United States 3,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,37 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,35 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,31 United States 4,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,26 United States 3,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,24 United States 4,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,23 United States 2,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,23 United States 2,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,19 United States 1,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,19 United States 2,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,18 United States 1,25 USD
+TNOTE TREASURY NOTE (2OLD) Treasury Fixed Income 1,18 United States 3,75 USD
+TNOTE TREASURY NOTE (OLD) Treasury Fixed Income 1,18 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,18 United States 1,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,18 United States 4,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,17 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,17 United States 3,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,17 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,17 United States 4,25 USD
+TNOTE TREASURY NOTE (2OLD) Treasury Fixed Income 1,16 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,16 United States 0,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,16 United States 3,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,16 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,15 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 4,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 1,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 2,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,14 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,13 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,13 United States 1,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,11 United States 1,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,08 United States 4,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,07 United States 1,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,06 United States 0,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,06 United States 1,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,06 United States 1,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,05 United States 1,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,05 United States 4,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,04 United States 1,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 1,00 United States 4,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,98 United States 1,75 USD
+TNOTE TREASURY NOTE (OTR) Treasury Fixed Income 0,97 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,94 United States 4,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,93 United States 0,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,92 United States 2,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,91 United States 0,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,90 United States 1,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,90 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,89 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,88 United States 4,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,88 United States 2,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,87 United States 0,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,87 United States 2,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,86 United States 4,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,85 United States 2,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,85 United States 0,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,85 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,84 United States 4,00 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,84 United States 3,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,84 United States 3,63 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,84 United States 3,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,82 United States 3,13 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,81 United States 3,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,80 United States 2,75 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,78 United States 2,88 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,73 United States 0,50 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,71 United States 4,38 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,71 United States 3,25 USD
+TNOTE TREASURY NOTE Treasury Fixed Income 0,63 United States 2,75 USD
+-- BLK ICS USD LEAF AGENCY DIST Cash and/or Derivatives Money Market 0,11 Ireland 3,73 USD
+GBP GBP CASH Cash and/or Derivatives Cash 0,02 United Kingdom 0,00 GBP
+USD USD CASH Cash and/or Derivatives Cash 0,00 United States 0,00 USD
+EUR EUR CASH Cash and/or Derivatives Cash 0,00 European Union 0,00 EUR
+"""
+
+with open("scripts/ibta_raw.txt", "w", encoding="utf-8") as f:
+    f.write(raw_text)
+print("Saved scripts/ibta_raw.txt")

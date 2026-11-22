@@ -1,0 +1,59 @@
+# Python script to parse EUNL OCR text into TypeScript array
+import re
+import json
+
+raw_text = """
+AAPL APPLE INC Information Technology Equity 7.904.447.085,08 5,37 7.904.447.085,08 24.118.042,00 327,74 United States NASDAQ USD
+NVDA NVIDIA CORP Information Technology Equity 7.861.231.757,15 5,34 7.861.231.757,15 37.923.835,00 207,29 United States NASDAQ USD
+MSFT MICROSOFT CORP Information Technology Equity 4.609.448.382,00 3,13 4.609.448.382,00 11.588.808,00 397,75 United States NASDAQ USD
+AMZN AMAZON.COM INC Consumer Discretionary Equity 3.936.123.473,35 2,68 3.936.123.473,35 15.900.317,00 247,55 United States NASDAQ USD
+GOOGL ALPHABET INC CLASS A Communication Equity 3.320.262.713,90 2,26 3.320.262.713,90 9.564.346,00 347,15 United States NASDAQ USD
+AVGO BROADCOM INC Information Technology Equity 2.855.925.800,00 1,94 2.855.925.800,00 7.389.200,00 386,50 United States NASDAQ USD
+GOOG ALPHABET INC CLASS C Communication Equity 2.628.784.417,87 1,79 2.628.784.417,87 7.593.473,00 346,19 United States NASDAQ USD
+META META PLATFORMS INC CLASS A Communication Equity 2.322.645.653,17 1,58 2.322.645.653,17 3.607.657,00 643,81 United States NASDAQ USD
+MU MICRON TECHNOLOGY INC Information Technology Equity 1.798.582.877,26 1,22 1.798.582.877,26 1.852.643,00 970,82 United States NASDAQ USD
+TSLA TESLA INC Consumer Discretionary Equity 1.751.938.520,19 1,19 1.751.938.520,19 4.623.383,00 378,93 United States NASDAQ USD
+LLY ELI LILLY Health Care Equity 1.550.766.604,81 1,05 1.550.766.604,81 1.319.341,00 1.175,41 United States New York Stock Exchange Inc. USD
+JPM JPMORGAN CHASE & CO Financials Equity 1.517.999.095,18 1,03 1.517.999.095,18 4.397.066,00 345,23 United States New York Stock Exchange Inc. USD
+AMD ADVANCED MICRO DEVICES INC Information Technology Equity 1.458.144.691,28 0,99 1.458.144.691,28 2.678.296,00 544,43 United States NASDAQ USD
+ASML ASML HOLDING NV Information Technology Equity 1.158.836.556,08 0,79 1.158.836.556,08 637.651,00 1.817,35 Netherlands Euronext Amsterdam EUR
+BRKB BERKSHIRE HATHAWAY INC CLASS B Financials Equity 1.118.696.989,55 0,76 1.118.696.989,55 2.284.687,00 489,65 United States New York Stock Exchange Inc. USD
+XOM EXXONMOBIL HOLDINGS CORP Energy Equity 1.039.212.741,45 0,71 1.039.212.741,45 6.849.995,00 151,71 United States New York Stock Exchange Inc. USD
+JNJ JOHNSON & JOHNSON Health Care Equity 991.629.937,65 0,67 991.629.937,65 3.956.865,00 250,61 United States New York Stock Exchange Inc. USD
+V VISA INC CLASS A Financials Equity 982.675.210,40 0,67 982.675.210,40 2.761.720,00 355,82 United States New York Stock Exchange Inc. USD
+WMT WALMART INC Consumer Staples Equity 795.190.832,52 0,54 795.190.832,52 7.203.468,00 110,39 United States NASDAQ USD
+INTC INTEL CORPORATION Information Technology Equity 766.426.417,50 0,52 766.426.417,50 7.268.150,00 105,45 United States NASDAQ USD
+ABBV ABBVIE INC Health Care Equity 744.161.038,40 0,51 744.161.038,40 2.905.744,00 256,10 United States New York Stock Exchange Inc. USD
+AMAT APPLIED MATERIAL INC Information Technology Equity 736.038.837,10 0,50 736.038.837,10 1.303.762,00 564,55 United States NASDAQ USD
+CSCO CISCO SYSTEMS INC Information Technology Equity 727.933.103,32 0,49 727.933.103,32 6.488.974,00 112,18 United States NASDAQ USD
+MA MASTERCARD INC CLASS A Financials Equity 724.098.013,10 0,49 724.098.013,10 1.345.157,00 538,30 United States New York Stock Exchange Inc. USD
+CAT CATERPILLAR INC Industrials Equity 680.525.350,17 0,46 680.525.350,17 764.661,00 889,97 United States New York Stock Exchange Inc. USD
+BAC BANK OF AMERICA CORP Financials Equity 677.566.124,50 0,46 677.566.124,50 11.067.725,00 61,22 United States New York Stock Exchange Inc. USD
+COST COSTCO WHOLESALE CORP Consumer Staples Equity 677.247.129,48 0,46 677.247.129,48 728.834,00 929,22 United States NASDAQ USD
+LRCX LAM RESEARCH CORP Information Technology Equity 660.573.662,00 0,45 660.573.662,00 2.051.471,00 322,00 United States NASDAQ USD
+UNH UNITEDHEALTH GROUP INC Health Care Equity 650.649.775,65 0,44 650.649.775,65 1.491.119,00 436,35 United States New York Stock Exchange Inc. USD
+GE GE AEROSPACE Industrials Equity 580.997.413,50 0,39 580.997.413,50 1.705.305,00 340,70 United States New York Stock Exchange Inc. USD
+CVX CHEVRON CORP Energy Equity 579.365.702,19 0,39 579.365.702,19 3.032.217,00 191,07 United States New York Stock Exchange Inc. USD
+PG PROCTER & GAMBLE Consumer Staples Equity 565.437.506,40 0,38 565.437.506,40 3.817.944,00 148,10 United States New York Stock Exchange Inc. USD
+HSBA HSBC HOLDINGS PLC Financials Equity 564.956.060,33 0,38 564.956.060,33 27.993.853,00 20,18 United Kingdom London Stock Exchange GBP
+HD HOME DEPOT INC Consumer Discretionary Equity 542.590.116,40 0,37 542.590.116,40 1.636.279,00 331,60 United States New York Stock Exchange Inc. USD
+GS GOLDMAN SACHS GROUP INC Financials Equity 525.924.509,88 0,36 525.924.509,88 484.473,00 1.085,56 United States New York Stock Exchange Inc. USD
+KO COCA-COLA Consumer Staples Equity 521.649.456,79 0,35 521.649.456,79 6.363.907,00 81,97 United States New York Stock Exchange Inc. USD
+MRK MERCK & CO INC Health Care Equity 512.802.717,32 0,35 512.802.717,32 4.061.482,00 126,26 United States New York Stock Exchange Inc. USD
+RY ROYAL BANK OF CANADA Financials Equity 486.784.459,10 0,33 486.784.459,10 2.304.027,00 211,28 Canada Toronto Stock Exchange CAD
+PM PHILIP MORRIS INTERNATIONAL INC Consumer Staples Equity 481.458.368,16 0,33 481.458.368,16 2.560.404,00 188,04 United States New York Stock Exchange Inc. USD
+GEV GE VERNOVA INC Industrials Equity 478.877.286,14 0,33 478.877.286,14 443.894,00 1.078,81 United States New York Stock Exchange Inc. USD
+NFLX NETFLIX INC Communication Equity 475.531.990,29 0,32 475.531.990,29 6.924.887,00 68,67 United States NASDAQ USD
+ROP ROCHE PS PAR AG Health Care Equity 475.264.822,00 0,32 475.264.822,00 1.157.052,00 410,75 Switzerland SIX Swiss Exchange CHF
+PLTR PALANTIR TECHNOLOGIES INC CLASS A Information Technology Equity 474.637.448,34 0,32 474.637.448,34 3.577.849,00 132,66 United States NASDAQ USD
+NOVN NOVARTIS AG Health Care Equity 464.778.385,28 0,32 464.778.385,28 3.008.620,00 154,48 Switzerland SIX Swiss Exchange CHF
+KLAC KLA CORP Information Technology Equity 464.133.366,48 0,32 464.133.366,48 2.133.358,00 217,56 United States NASDAQ USD
+PANW PALO ALTO NETWORKS INC Information Technology Equity 455.861.499,60 0,31 455.861.499,60 1.332.344,00 342,15 United States NASDAQ USD
+WFC WELLS FARGO Financials Equity 444.891.636,32 0,30 444.891.636,32 5.070.568,00 87,74 United States New York Stock Exchange Inc. USD
+TXN TEXAS INSTRUMENT INC Information Technology Equity 435.700.614,30 0,30 435.700.614,30 1.495.711,00 291,30 United States NASDAQ USD
+NESN NESTLE SA Consumer Staples Equity 435.698.094,48 0,30 435.698.094,48 4.201.116,00 103,71 Switzerland SIX Swiss Exchange CHF
+RTX RTX CORP Industrials Equity 428.246.396,39 0,29 428.246.396,39 2.211.217,00 193,67 United States New York Stock Exchange Inc. USD
+MS MORGAN STANLEY Financials Equity 418.793.510,00 0,28 418.793.510,00 1.935.275,00 216,40 United States New York Stock Exchange Inc. USD
+"""
+
+print("Done template script")

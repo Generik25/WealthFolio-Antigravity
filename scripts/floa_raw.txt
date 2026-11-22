@@ -1,0 +1,564 @@
+raw_text = """
+BLK ICS USD LEAF AGENCY DIST Cash and/or Derivatives Money Market 1,93 Ireland 3,73 USD
+EBRD EUROPEAN BANK FOR RECONSTRUCTION A MTN Supranational Fixed Income 1,18 Supranational 4,00 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 1,13 Supranational 4,10 USD
+EBRD EUROPEAN BANK FOR RECONSTRUCTION A MTN Supranational Fixed Income 1,11 Supranational 3,97 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT Supranational Fixed Income 0,85 Supranational 4,21 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 0,85 Supranational 3,90 USD
+ASIA ASIAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,83 Supranational 4,02 USD
+EBRD EUROPEAN BANK FOR RECONSTRUCTION A MTN Supranational Fixed Income 0,83 Supranational 4,04 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,82 Supranational 4,04 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT Supranational Fixed Income 0,81 Supranational 3,91 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK Supranational Fixed Income 0,81 Supranational 3,95 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK Supranational Fixed Income 0,81 Supranational 3,99 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,81 Supranational 3,95 USD
+IFC INTERNATIONAL FINANCE CORP MTN Supranational Fixed Income 0,81 Supranational 3,99 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,78 Supranational 4,10 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,78 Supranational 3,97 USD
+IFC INTERNATIONAL FINANCE CORP MTN Supranational Fixed Income 0,76 Supranational 3,99 USD
+KBN KOMMUNALBANKEN AS MTN 144A Owned No Guarantee Fixed Income 0,76 Norway 4,10 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT Supranational Fixed Income 0,72 Supranational 3,97 USD
+KBN KOMMUNALBANKEN AS MTN 144A Owned No Guarantee Fixed Income 0,69 Norway 4,01 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 0,62 Supranational 4,06 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT Supranational Fixed Income 0,60 Supranational 3,99 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 0,53 Supranational 3,96 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 0,51 Supranational 3,95 USD
+ASIA ASIAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,47 Supranational 4,60 USD
+KDB KOREA DEVELOPMENT BANK Owned No Guarantee Fixed Income 0,45 Korea (South) 4,38 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,45 Supranational 3,88 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,44 Australia 4,29 USD
+DBSSP DBS GROUP HOLDINGS LTD MTN 144A Banking Fixed Income 0,42 Singapore 4,23 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA FRN MTN 144A Banking Fixed Income 0,41 Australia 4,43 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,39 United States 4,67 USD
+MS MORGAN STANLEY (FRN) MTN Banking Fixed Income 0,39 United States 4,64 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA MTN 144A Banking Fixed Income 0,38 Australia 4,09 USD
+HSBC HSBC HOLDINGS PLC Banking Fixed Income 0,38 United Kingdom 5,19 USD
+IFC INTERNATIONAL FINANCE CORPORATION MTN Supranational Fixed Income 0,38 Supranational 4,00 USD
+EIB EUROPEAN INVESTMENT BANK 144A Supranational Fixed Income 0,37 Supranational 4,68 USD
+AMZN AMAZON.COM INC Consumer Cyclical Fixed Income 0,36 United States 4,08 USD
+KORELE KOREA ELECTRIC POWER CORP RegS Owned No Guarantee Fixed Income 0,35 Korea (South) 4,24 USD
+EIB EUROPEAN INVESTMENT BANK Supranational Fixed Income 0,35 Supranational 3,99 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK Banking Fixed Income 0,34 Netherlands 4,34 USD
+MS MORGAN STANLEY PRIVATE BANK (FRN) Banking Fixed Income 0,33 United States 4,37 USD
+SEK SWEDISH EXPORT CREDIT CORP MTN Owned No Guarantee Fixed Income 0,33 Sweden 3,99 USD
+C CITIBANK NA Banking Fixed Income 0,33 United States 4,41 USD
+AMZN AMAZON.COM INC Consumer Cyclical Fixed Income 0,33 United States 4,24 USD
+MS MORGAN STANLEY BANK NA FRN Banking Fixed Income 0,33 United States 4,54 USD
+GS GOLDMAN SACHS GROUP INC/THE MTN Banking Fixed Income 0,31 United States 5,68 USD
+ABT ABBOTT LABORATORIES Consumer Non-Cyclical Fixed Income 0,31 United States 4,13 USD
+WSTP WESTPAC BANKING CORP MTN 144A Banking Fixed Income 0,31 Australia 4,33 USD
+EIBKOR EXPORT-IMPORT BANK OF KOREA Owned No Guarantee Fixed Income 0,31 Korea (South) 4,44 USD
+TEMASE TEMASEK FINANCIAL (I) LTD MTN 144A Owned No Guarantee Fixed Income 0,30 Singapore 4,00 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,30 Australia 4,24 USD
+BAC BANK OF AMERICA CORP MTN Banking Fixed Income 0,30 United States 4,47 USD
+SANTAN BANCO SANTANDER SA Banking Fixed Income 0,30 Spain 4,71 USD
+JPM JPMORGAN CHASE & CO (FRN) Banking Fixed Income 0,29 United States 4,42 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,29 Australia 4,41 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,29 Australia 0,00 USD
+SEK SWEDISH EXPORT CREDIT CORP MTN Owned No Guarantee Fixed Income 0,29 Sweden 4,67 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD FRN MTN 144A Banking Fixed Income 0,28 Japan 4,61 USD
+C CITIGROUP INC (FRN) Banking Fixed Income 0,28 United States 4,50 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,28 Australia 4,24 USD
+JPM JPMORGAN CHASE & CO (FRN) Banking Fixed Income 0,28 United States 4,52 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT MTN Supranational Fixed Income 0,28 Supranational 4,04 USD
+JPM JPMORGAN CHASE & CO FRN Banking Fixed Income 0,28 United States 4,53 USD
+GS GOLDMAN SACHS GROUP INC/THE Banking Fixed Income 0,28 United States 4,32 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,27 Netherlands 4,25 USD
+MQGAU MACQUARIE BANK LTD MTN 144A Banking Fixed Income 0,27 Australia 4,37 USD
+PSA PUBLIC STORAGE OPERATING CO Reits Fixed Income 0,27 United States 4,71 USD
+ABNANV ABN AMRO BANK NV (FRN) MTN 144A Banking Fixed Income 0,27 Netherlands 5,50 USD
+ASIA ASIAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,27 Supranational 3,90 USD
+LLOYDS LLOYDS BANKING GROUP PLC (FRN) Banking Fixed Income 0,26 United Kingdom 5,23 USD
+EIBKOR EXPORT-IMPORT BANK OF KOREA Owned No Guarantee Fixed Income 0,26 Korea (South) 4,06 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,26 United States 4,53 USD
+WSTPNZ WESTPAC NEW ZEALAND LTD MTN 144A Banking Fixed Income 0,26 New Zealand 4,37 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,26 United States 3,64 USD
+WSTP WESTPAC BANKING CORP Banking Fixed Income 0,26 Australia 4,42 USD
+MS MORGAN STANLEY (FRN) MTN Banking Fixed Income 0,26 United States 4,40 USD
+WSTP WESTPAC BANKING CORP Banking Fixed Income 0,25 Australia 4,06 USD
+RY ROYAL BANK OF CANADA MTN Banking Fixed Income 0,25 Canada 4,91 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,25 United States 4,66 USD
+INTNED ING GROEP NV (FRN) Banking Fixed Income 0,25 Netherlands 5,27 USD
+HSBC HSBC HOLDINGS PLC FRN Banking Fixed Income 0,25 United Kingdom 4,66 USD
+WSTP WESTPAC BANKING CORP Banking Fixed Income 0,25 Australia 4,43 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,25 Australia 4,09 USD
+MQGAU MACQUARIE BANK LTD MTN 144A Banking Fixed Income 0,24 Australia 4,10 USD
+HSBC HSBC HOLDINGS PLC (FRN) Banking Fixed Income 0,24 United Kingdom 5,19 USD
+NAB NATIONAL AUSTRALIA BANK LTD FRN MTN 144A Banking Fixed Income 0,24 Australia 4,24 USD
+UBS UBS GROUP AG (FRN) 144A Banking Fixed Income 0,24 Switzerland 4,47 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD FRN MTN 144A Banking Fixed Income 0,24 Japan 4,77 USD
+JPM JPMORGAN CHASE & CO (FRN) Banking Fixed Income 0,24 United States 4,81 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,24 United States 0,00 USD
+BZLNZ BANK OF NEW ZEALAND MTN 144A Banking Fixed Income 0,24 New Zealand 4,41 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA MTN 144A Banking Fixed Income 0,24 Australia 4,26 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,24 United States 4,40 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,23 Australia 4,36 USD
+EDC EXPORT DEVELOPMENT CANADA MTN Government Guaranteed Fixed Income 0,23 Canada 3,90 USD
+SUMIBK SUMITOMO MITSUI FINANCIAL GROUP IN Banking Fixed Income 0,23 Japan 4,64 USD
+SEB SKANDINAVISKA ENSKILDA BANKEN AB 144A Banking Fixed Income 0,23 Sweden 4,52 USD
+C CITIBANK NA (FRN) Banking Fixed Income 0,23 United States 4,34 USD
+SHBASS SVENSKA HANDELSBANKEN AB MTN 144A Banking Fixed Income 0,23 Sweden 4,29 USD
+JPM JPMORGAN CHASE BANK NA Banking Fixed Income 0,23 United States 4,63 USD
+MS MORGAN STANLEY BANK NA (FRN) Banking Fixed Income 0,23 United States 4,30 USD
+ABBV ABBVIE INC (FRN) Consumer Non-Cyclical Fixed Income 0,23 United States 4,12 USD
+AIIB ASIAN INFRASTRUCTURE INVESTMENT BA MTN 144A Supranational Fixed Income 0,22 Supranational 4,29 USD
+DIS WALT DISNEY CO Communications Fixed Income 0,22 United States 4,11 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD MTN 144A Banking Fixed Income 0,22 Japan 4,61 USD
+C CITIGROUP INC (FRN) Banking Fixed Income 0,22 United States 4,76 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,22 Canada 4,25 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION Consumer Cyclical Fixed Income 0,22 United States 4,25 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,22 Australia 4,27 USD
+STANLN STANDARD CHARTERED PLC MTN 144A Banking Fixed Income 0,22 United Kingdom 5,30 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,22 Australia 4,22 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,22 United States 4,27 USD
+BMO BANK OF MONTREAL (FRN) MTN Banking Fixed Income 0,22 Canada 4,53 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,22 Australia 4,27 USD
+ABNANV ABN AMRO BANK NV MTN 144A Banking Fixed Income 0,22 Netherlands 4,36 USD
+SUMIBK SUMITOMO MITSUI FINANCIAL GROUP IN Banking Fixed Income 0,22 Japan 4,47 USD
+HSBC HSBC HOLDINGS PLC FRN Banking Fixed Income 0,22 United Kingdom 4,92 USD
+NOMURA NOMURA HOLDINGS INC Brokerage/Asset Managers/Exchanges Fixed Income 0,22 Japan 4,87 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD MTN 144A Banking Fixed Income 0,21 Japan 4,38 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA MTN 144A Banking Fixed Income 0,21 Australia 4,26 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA MTN 144A Banking Fixed Income 0,21 Australia 4,39 USD
+BMW BMW US CAPITAL LLC 144A Consumer Cyclical Fixed Income 0,21 Germany 4,55 USD
+JPM JPMORGAN CHASE & CO (FRN) Banking Fixed Income 0,21 United States 4,46 USD
+MS MORGAN STANLEY PRIVATE BANK (FRN) Banking Fixed Income 0,21 United States 4,40 USD
+MS MORGAN STANLEY BANK NA (FRN) Banking Fixed Income 0,21 United States 4,49 USD
+PEP PEPSICO SINGAPORE FINANCING I PTE Consumer Non-Cyclical Fixed Income 0,21 United States 4,23 USD
+STANLN STANDARD CHARTERED PLC (FRN) 144A Banking Fixed Income 0,21 United Kingdom 4,79 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,21 United States 4,39 USD
+MQGAU MACQUARIE BANK LTD MTN 144A Banking Fixed Income 0,21 Australia 4,53 USD
+MBGGR MERCEDES-BENZ FINANCE NORTH AMERIC 144A Consumer Cyclical Fixed Income 0,21 Germany 4,26 USD
+LLOYDS LLOYDS BANKING GROUP PLC FRN Banking Fixed Income 0,21 United Kingdom 4,74 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING 144A Insurance Fixed Income 0,21 United States 4,05 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD MTN 144A Banking Fixed Income 0,21 Japan 4,52 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,21 United States 4,35 USD
+MIZUHO MIZUHO BANK LTD 144A Banking Fixed Income 0,21 Japan 4,67 USD
+NOVNVX NOVARTIS CAPITAL CORP Consumer Non-Cyclical Fixed Income 0,21 Switzerland 4,15 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,21 Canada 4,40 USD
+BACR BARCLAYS PLC (FRN) Banking Fixed Income 0,21 United Kingdom 5,11 USD
+MQGAU MACQUARIE BANK LTD MTN 144A Banking Fixed Income 0,20 Australia 4,38 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,20 United States 4,00 USD
+BMO BANK OF MONTREAL Banking Fixed Income 0,20 Canada 4,87 USD
+JPM JPMORGAN CHASE & CO (FRN) Banking Fixed Income 0,20 United States 4,82 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING (FRN) MTN 144A Insurance Fixed Income 0,20 United States 4,28 USD
+LLY ELI LILLY AND COMPANY (FRN) Consumer Non-Cyclical Fixed Income 0,20 United States 3,97 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,20 United States 4,52 USD
+C CITIGROUP INC FRN Banking Fixed Income 0,20 United States 4,91 USD
+ACAFP CREDIT AGRICOLE SA (FRN) MTN 144A Banking Fixed Income 0,20 France 4,50 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,20 Australia 4,39 USD
+ABNANV ABN AMRO BANK NV (FRN) MTN 144A Banking Fixed Income 0,20 Netherlands 4,63 USD
+SCHW CHARLES SCHWAB CORPORATION (THE) Brokerage/Asset Managers/Exchanges Fixed Income 0,20 United States 4,68 USD
+AXP AMERICAN EXPRESS CO (FRN) Banking Fixed Income 0,20 United States 4,22 USD
+CM CANADIAN IMPERIAL BANK (FRN) Banking Fixed Income 0,20 Canada 4,45 USD
+BAC BANK OF AMERICA CORP FRN MTN Banking Fixed Income 0,20 United States 4,67 USD
+BAC BANK OF AMERICA CORP (FRN) MTN Banking Fixed Income 0,20 United States 4,73 USD
+BNG BNG BANK NV MTN 144A Owned No Guarantee Fixed Income 0,19 Netherlands 3,57 USD
+LLY ELI LILLY AND COMPANY (FRN) Consumer Non-Cyclical Fixed Income 0,19 United States 4,08 USD
+NDAFH NORDEA BANK ABP (FRN) 144A Banking Fixed Income 0,19 Finland 4,36 USD
+PNC PNC FINANCIAL SERVICES (FRN) Banking Fixed Income 0,19 United States 0,00 USD
+ATH ATHENE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,19 United States 4,58 USD
+SUMITR SUMITOMO MITSUI TRUST BANK LTD MTN 144A Banking Fixed Income 0,19 Japan 4,34 USD
+INTNED ING GROEP NV FRN Banking Fixed Income 0,19 Netherlands 4,67 USD
+NWIDE NATIONWIDE BUILDING SOCIETY MTN 144A Banking Fixed Income 0,19 United Kingdom 4,91 USD
+UOBSP UNITED OVERSEAS BANK LTD MTN 144A Banking Fixed Income 0,19 Singapore 4,34 USD
+BMW BMW US CAPITAL LLC 144A Consumer Cyclical Fixed Income 0,19 Germany 4,42 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,19 Canada 4,68 USD
+SUMIBK SUMITOMO MITSUI FINANCIAL GROUP IN Banking Fixed Income 0,19 Japan 4,78 USD
+HNDA AMERICAN HONDA FINANCE CORP (FRN) MTN Consumer Cyclical Fixed Income 0,19 United States 4,55 USD
+NTT NTT FINANCE CORP 144A Communications Fixed Income 0,19 Japan 4,65 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,19 Australia 4,30 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,19 United States 4,47 USD
+LLY ELI LILLY AND COMPANY Consumer Non-Cyclical Fixed Income 0,18 United States 4,19 USD
+DB DEUTSCHE BANK AG (NY BRANCH) FRN Banking Fixed Income 0,18 Germany 4,84 USD
+AXP AMERICAN EXPRESS COMPANY Banking Fixed Income 0,18 United States 4,32 USD
+C CITIBANK NA Banking Fixed Income 0,18 United States 4,75 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,18 United States 4,97 USD
+ORCL ORACLE CORPORATION Technology Fixed Income 0,18 United States 4,73 USD
+MS MORGAN STANLEY BANK NA (FRN) Banking Fixed Income 0,18 United States 4,69 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,18 United Kingdom 4,42 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,18 Canada 4,84 USD
+CRBG COREBRIDGE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,18 United States 4,92 USD
+CVX CHEVRON USA INC Energy Fixed Income 0,18 United States 4,20 USD
+INDKOR INDUSTRIAL BANK OF KOREA MTN RegS Owned No Guarantee Fixed Income 0,18 Korea (South) 4,24 USD
+BMO BANK OF MONTREAL MTN Banking Fixed Income 0,18 Canada 4,25 USD
+CAT CATERPILLAR FINANCIAL SERV (FRN) MTN Capital Goods Fixed Income 0,18 United States 4,31 USD
+WMT WALMART INC Consumer Cyclical Fixed Income 0,18 United States 4,06 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,18 Canada 5,30 USD
+GS GOLDMAN SACHS GROUP INC/THE FRN Banking Fixed Income 0,18 United States 4,76 USD
+HBAN HUNTINGTON NATIONAL BANK (FRN) Banking Fixed Income 0,18 United States 4,33 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,18 United States 4,37 USD
+ANZNZ ANZ NEW ZEALAND INTL LTD (LONDON B MTN 144A Banking Fixed Income 0,17 New Zealand 4,22 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,17 United States 4,36 USD
+BMW BMW US CAPITAL LLC 144A Consumer Cyclical Fixed Income 0,17 Germany 4,41 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,17 United States 4,07 USD
+KHFC KOREA HOUSING FINANCE CORP MTN RegS Owned No Guarantee Fixed Income 0,17 Korea (South) 4,51 USD
+CM CANADIAN IMPERIAL BANK OF COMMERCE Banking Fixed Income 0,17 Canada 4,99 USD
+JPM JPMORGAN CHASE & CO FRN Banking Fixed Income 0,17 United States 4,49 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,17 United States 0,00 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,17 Canada 4,21 USD
+SHBASS SVENSKA HANDELSBANKEN AB (FRN) MTN 144A Banking Fixed Income 0,17 Sweden 4,19 USD
+SIEGR SIEMENS FUNDING BV 144A Capital Goods Fixed Income 0,17 Germany 4,28 USD
+KUNTA KUNTARAHOITUS OYJ MTN 144A Local Authority Fixed Income 0,17 Finland 4,64 USD
+KUNTA KUNTARAHOITUS OYJ 144A Local Authority Fixed Income 0,17 Finland 4,63 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,17 United States 4,13 USD
+JXN JACKSON NATIONAL LIFE GLOBAL FUNDI MTN 144A Insurance Fixed Income 0,17 United States 4,60 USD
+HSBC HSBC USA INC Banking Fixed Income 0,17 United States 4,61 USD
+GSK GLAXOSMITHKLINE CAPITAL PLC Consumer Non-Cyclical Fixed Income 0,17 United Kingdom 4,16 USD
+JPM JPMORGAN CHASE & CO (FRN) MTN Banking Fixed Income 0,17 United States 4,44 USD
+GS GOLDMAN SACHS GROUP INC/THE Banking Fixed Income 0,16 United States 4,53 USD
+STANLN STANDARD CHARTERED PLC (FRN) 144A Banking Fixed Income 0,16 United Kingdom 4,51 USD
+CVX CHEVRON USA INC Energy Fixed Income 0,16 United States 3,99 USD
+MS MORGAN STANLEY (FRN) MTN Banking Fixed Income 0,16 United States 5,00 USD
+NOVNVX NOVARTIS CAPITAL CORP Consumer Non-Cyclical Fixed Income 0,16 Switzerland 4,30 USD
+BAC BANK OF AMERICA CORP (FRN) MTN Banking Fixed Income 0,16 United States 4,97 USD
+MS MORGAN STANLEY PRIVATE BANK (FRN) Banking Fixed Income 0,16 United States 4,39 USD
+TD TORONTO-DOMINION BANK/THE (FRN) MTN Banking Fixed Income 0,16 Canada 4,34 USD
+KOROIL KOREA NATIONAL OIL CORP MTN RegS Owned No Guarantee Fixed Income 0,16 Korea (South) 4,39 USD
+MS MORGAN STANLEY BANK NA (FRN) Banking Fixed Income 0,16 United States 4,52 USD
+INDKOR INDUSTRIAL BANK OF KOREA RegS Owned No Guarantee Fixed Income 0,16 Korea (South) 4,20 USD
+CM CANADIAN IMPERIAL BANK OF COMMERCE Banking Fixed Income 0,16 Canada 4,57 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,16 United States 4,18 USD
+SANFP SANOFI SA MTN Consumer Non-Cyclical Fixed Income 0,16 United States 4,16 USD
+SEK SWEDISH EXPORT CREDIT CORP MTN Owned No Guarantee Fixed Income 0,16 Sweden 4,62 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,16 Canada 4,34 USD
+GS GOLDMAN SACHS GROUP INC/THE (FRN) Banking Fixed Income 0,16 United States 3,64 USD
+MUFG MITSUBISHI UFJ FINANCIAL GROUP INC Banking Fixed Income 0,16 Japan 5,07 USD
+MQGAU MACQUARIE BANK LTD MTN 144A Banking Fixed Income 0,16 Australia 4,83 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,16 United States 4,65 USD
+CM CANADIAN IMPERIAL (FRN) Banking Fixed Income 0,16 Canada 4,38 USD
+ACAFP CREDIT AGRICOLE SA (FRN) MTN 144A Banking Fixed Income 0,16 France 4,74 USD
+MRK MERCK & CO INC (FRN) Consumer Non-Cyclical Fixed Income 0,15 United States 4,21 USD
+MBGGR MERCEDES-BENZ FINANCE NORTH (FRN) 144A Consumer Cyclical Fixed Income 0,15 Germany 4,40 USD
+LLOYDS LLOYDS BANKING GROUP PLC Banking Fixed Income 0,15 United Kingdom 5,18 USD
+BMO BANK OF MONTREAL (FRN) MTN Banking Fixed Income 0,15 Canada 0,00 USD
+BAC BANK OF AMERICA CORP MTN Banking Fixed Income 0,15 United States 4,65 USD
+UBS UBS AG (STAMFORD BRANCH) FRN MTN Banking Fixed Income 0,15 Switzerland 4,44 USD
+ACAFP CREDIT AGRICOLE SA FRN MTN 144A Banking Fixed Income 0,15 France 4,83 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,15 United States 4,15 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,15 Netherlands 4,27 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,15 United States 4,61 USD
+SOCGEN SOCIETE GENERALE SA (FRN) MTN 144A Banking Fixed Income 0,15 France 4,70 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,15 United States 4,36 USD
+NDAFH NORDEA BANK ABP MTN 144A Banking Fixed Income 0,15 Finland 4,33 USD
+STANLN STANDARD CHARTERED PLC MTN 144A Banking Fixed Income 0,15 United Kingdom 4,85 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,15 Canada 4,51 USD
+DB DEUTSCHE BANK AG (NEW YORK) (FRN) Banking Fixed Income 0,15 Germany 4,81 USD
+PYPL PAYPAL HOLDINGS INC (FRN) Technology Fixed Income 0,15 United States 4,31 USD
+WSTP WESTPAC BANKING CORP MTN 144A Banking Fixed Income 0,15 Australia 4,13 USD
+WMT WALMART INC Consumer Cyclical Fixed Income 0,15 United States 4,02 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING (FRN) MTN 144A Insurance Fixed Income 0,15 United States 3,64 USD
+HSBC HSBC HOLDINGS PLC FRN Banking Fixed Income 0,15 United Kingdom 4,71 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,15 Canada 4,33 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,15 United States 4,20 USD
+PROTLI PROTECTIVE LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,15 United States 4,48 USD
+CAT CATERPILLAR FINC SERVICES (FRN) MTN Capital Goods Fixed Income 0,15 United States 4,15 USD
+STT STATE STREET BANK & TRUST CO (FRN) Banking Fixed Income 0,15 United States 4,08 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,15 United States 4,34 USD
+NTT NTT FINANCE CORP 144A Communications Fixed Income 0,15 Japan 4,90 USD
+GM GENERAL MOTORS FINANCIAL CO INC Consumer Cyclical Fixed Income 0,15 United States 5,02 USD
+GLENLN GLENCORE FUNDING LLC (FRN) 144A Basic Industry Fixed Income 0,15 Switzerland 4,67 USD
+NEE NEXTERA ENERGY CAPITAL (FRN) Electric Fixed Income 0,15 United States 4,43 USD
+BMW BMW US CAPITAL LLC 144A Consumer Cyclical Fixed Income 0,15 Germany 4,42 USD
+TD TORONTO-DOMINION BANK/THE (FRN) MTN Banking Fixed Income 0,14 Canada 4,44 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION Consumer Cyclical Fixed Income 0,14 United States 4,37 USD
+FIS FIDELITY NATIONAL INFORMATION SERV Technology Fixed Income 0,14 United States 4,84 USD
+CARGIL CARGILL INC (FRN) 144A Consumer Non-Cyclical Fixed Income 0,14 United States 4,23 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,14 Canada 4,19 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,14 Australia 4,31 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,14 Canada 4,47 USD
+CAT CATERPILLAR FINANCIAL SERVICES FRN Capital Goods Fixed Income 0,14 United States 4,18 USD
+MQGAU MACQUARIE GROUP LTD MTN 144A Banking Fixed Income 0,14 Australia 4,54 USD
+HSBC HSBC HOLDINGS PLC FRN Banking Fixed Income 0,14 United Kingdom 4,91 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,14 Canada 4,52 USD
+MIZUHO MIZUHO BANK LTD 144A Banking Fixed Income 0,14 Japan 4,42 USD
+MBGGR MERCEDES-BENZ FINANCE NORTH (FRN) 144A Consumer Cyclical Fixed Income 0,14 Germany 4,55 USD
+SUMIBK SUMITOMO MITSUI FINANCIAL GROUP IN Banking Fixed Income 0,14 Japan 4,62 USD
+LLOYDS LLOYDS BANKING GROUP PLC FRN MTN Banking Fixed Income 0,14 United Kingdom 4,40 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,14 Canada 4,66 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,14 Canada 4,98 USD
+WSTP WESTPAC BANKING CORP MTN 144A Banking Fixed Income 0,14 Australia 4,31 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,14 Netherlands 4,06 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,14 United States 4,30 USD
+BMO BANK OF MONTREAL (FRN) MTN Banking Fixed Income 0,14 Canada 4,39 USD
+BAC BANK OF AMERICA CORP (FRN) MTN Banking Fixed Income 0,14 United States 4,52 USD
+ANZNZ ANZ NEW ZEALAND INTL LTD (LONDON B MTN 144A Banking Fixed Income 0,14 New Zealand 4,36 USD
+BBVASM BANCO BILBAO VIZCAYA ARGENTARIA SA Banking Fixed Income 0,14 Spain 4,51 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,14 United States 4,26 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,14 United States 4,23 USD
+CCDJ FEDERATION DES CAISSES DESJARDINS MTN 144A Banking Fixed Income 0,14 Canada 4,27 USD
+C CITIBANK NA (FRN) Banking Fixed Income 0,14 United States 4,22 USD
+BNY BNY MELLON CORP/THE (FRN) MTN Banking Fixed Income 0,14 United States 4,58 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,13 Canada 4,77 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,13 United States 4,32 USD
+SOCGEN SOCIETE GENERALE SA (FRN) MTN 144A Banking Fixed Income 0,13 France 5,10 USD
+MET METROPOLITAN LIFE GLOBAL FUNDING I MTN 144A Insurance Fixed Income 0,13 United States 4,33 USD
+SO GEORGIA POWER COMPANY Electric Fixed Income 0,13 United States 3,92 USD
+KOROIL KOREA NATIONAL OIL CORP MTN RegS Owned No Guarantee Fixed Income 0,13 Korea (South) 4,44 USD
+C CITIBANK NA Banking Fixed Income 0,13 United States 4,69 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,13 United States 4,41 USD
+MS MORGAN STANLEY (FRN) MTN Banking Fixed Income 0,13 United States 4,75 USD
+PM PHILIP MORRIS INTERNATIONAL INC Consumer Non-Cyclical Fixed Income 0,13 United States 0,00 USD
+DTRGR DAIMLER TRUCK FINANCE NORTH AMERIC 144A Consumer Cyclical Fixed Income 0,13 Germany 4,58 USD
+HONA HONEYWELL AEROSPACE INC (FRN) 144A Capital Goods Fixed Income 0,13 United States 4,28 USD
+CM CANADIAN IMPERIAL BANK OF CO (FRN) Banking Fixed Income 0,13 Canada 4,76 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,13 United States 4,66 USD
+NWG NATWEST GROUP PLC (FRN) Banking Fixed Income 0,13 United Kingdom 4,97 USD
+BNS BANK OF NOVA SCOTIA Banking Fixed Income 0,13 Canada 4,32 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,13 United Kingdom 4,76 USD
+ANZ AUSTRALIA AND NEW ZEALAND BANKING MTN 144A Banking Fixed Income 0,13 Australia 4,47 USD
+BFCM BANQUE FEDERATIVE DU CREDIT MUTUEL MTN 144A Banking Fixed Income 0,13 France 5,10 USD
+F FORD MOTOR CREDIT COMPANY LLC (FRN Consumer Cyclical Fixed Income 0,13 United States 5,12 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,13 United States 4,46 USD
+ED CONSOLIDATED EDISON COMPANY OF NEW Electric Fixed Income 0,13 United States 4,14 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,13 United States 4,68 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,13 United Kingdom 4,51 USD
+BACR BARCLAYS PLC (FRN) Banking Fixed Income 0,13 United Kingdom 4,70 USD
+BMO BANK OF MONTREAL (FRN) MTN Banking Fixed Income 0,13 Canada 4,46 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,13 Netherlands 4,51 USD
+MS MORGAN STANLEY MTN Banking Fixed Income 0,13 United States 4,54 USD
+BNP BNP PARIBAS SA (FRN) MTN 144A Banking Fixed Income 0,13 France 5,05 USD
+MASSMU MASSMUTUAL GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,13 United States 4,44 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,13 United States 4,12 USD
+ATH ATHENE GLOBAL FUNDING 144A Insurance Fixed Income 0,13 United States 4,95 USD
+SEB SKANDINAVISKA ENSKILDA BANKEN AB MTN 144A Banking Fixed Income 0,13 Sweden 4,38 USD
+PNC PNC FINANCIAL SERVICES (FRN) Banking Fixed Income 0,12 United States 0,00 USD
+KDB KOREA DEVELOPMENT BANK MTN Owned No Guarantee Fixed Income 0,12 Korea (South) 4,13 USD
+BACR BARCLAYS PLC (FRN) Banking Fixed Income 0,12 United Kingdom 3,64 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,12 United States 4,30 USD
+CAT CATERPILLAR FINANCIAL SERVICES MTN Capital Goods Fixed Income 0,12 United States 4,14 USD
+ATH ATHENE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,12 United States 4,62 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,12 United Kingdom 4,81 USD
+MASSMU MASSMUTUAL GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,12 United States 4,27 USD
+NRUC NATIONAL RURAL UTILITIES COOPERATI MTN Electric Fixed Income 0,12 United States 4,47 USD
+VW VOLKSWAGEN GROUP OF AMERICA (FRN) 144A Consumer Cyclical Fixed Income 0,12 Germany 4,69 USD
+SOCGEN SOCIETE GENERALE SA (FRN) MTN 144A Banking Fixed Income 0,12 France 5,02 USD
+DBSSP DBS GROUP HOLDINGS LTD MTN 144A Banking Fixed Income 0,12 Singapore 4,28 USD
+NWG NATWEST MARKETS PLC (FRN) MTN 144A Banking Fixed Income 0,12 United Kingdom 4,57 USD
+CVX CHEVRON USA INC Energy Fixed Income 0,12 United States 4,50 USD
+BZLNZ BANK OF NEW ZEALAND FRN MTN 144A Banking Fixed Income 0,12 New Zealand 0,00 USD
+BMW BMW US CAPITAL LLC (FRN) 144A Consumer Cyclical Fixed Income 0,12 Germany 4,34 USD
+LGENSO LG ENERGY SOLUTION LTD RegS Consumer Cyclical Fixed Income 0,12 Korea (South) 5,31 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,12 United States 5,11 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,12 United States 4,20 USD
+MBGGR MERCEDES-BENZ FINANCE NORTH AMERIC 144A Consumer Cyclical Fixed Income 0,12 Germany 4,47 USD
+KORGAS KOREA GAS CORPORATION MTN RegS Owned No Guarantee Fixed Income 0,12 Korea (South) 4,25 USD
+MRSH MARSH & MCLENNAN COMPANIES (FRN) Insurance Fixed Income 0,12 United States 4,32 USD
+LLOYDS LLOYDS BANKING GROUP PLC (FRN) Banking Fixed Income 0,12 United Kingdom 4,72 USD
+AMZN AMAZON.COM INC Consumer Cyclical Fixed Income 0,12 United States 4,40 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,12 United States 4,37 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,12 United States 0,00 USD
+NDAFH NORDEA BANK ABP MTN 144A Banking Fixed Income 0,12 Finland 4,10 USD
+NOMURA NOMURA HOLDINGS INC Brokerage/Asset Managers/Exchanges Fixed Income 0,12 Japan 4,57 USD
+SWEDA SWEDBANK AB MTN 144A Banking Fixed Income 0,12 Sweden 4,65 USD
+JXN JACKSON NATIONAL LIFE GLOBAL FUNDI MTN 144A Insurance Fixed Income 0,12 United States 4,58 USD
+WFC WELLS FARGO & COMPANY (FRN) MTN Banking Fixed Income 0,12 United States 4,99 USD
+KDB KOREA DEVELOPMENT BANK Owned No Guarantee Fixed Income 0,12 Korea (South) 4,30 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,12 Netherlands 4,11 USD
+STANLN STANDARD CHARTERED PLC FRN 144A Banking Fixed Income 0,12 United Kingdom 5,65 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,12 Canada 4,42 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,12 Supranational 3,90 USD
+CVX CHEVRON USA INC Energy Fixed Income 0,12 United States 4,11 USD
+NTT NTT FINANCE CORP 144A Communications Fixed Income 0,12 Japan 4,67 USD
+MASSMU MASSMUTUAL GLOBAL FUNDING II (FRN) MTN 144A Insurance Fixed Income 0,11 United States 4,35 USD
+MET METROPOLITAN LIFE GLOBAL FUNDING I MTN 144A Insurance Fixed Income 0,11 United States 4,23 USD
+EIBKOR EXPORT-IMPORT BANK OF KOREA Owned No Guarantee Fixed Income 0,11 Korea (South) 4,09 USD
+UBS UBS GROUP AG 144A Banking Fixed Income 0,11 Switzerland 4,44 USD
+SANUSA SANTANDER HOLDINGS USA INC (FRN) Banking Fixed Income 0,11 United States 5,23 USD
+KOROIL KOREA NATIONAL OIL CORP MTN RegS Owned No Guarantee Fixed Income 0,11 Korea (South) 4,52 USD
+GS GOLDMAN SACHS GROUP INC/THE (FRN) Banking Fixed Income 0,11 United States 4,71 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,11 Netherlands 4,37 USD
+SRE SEMPRA Natural Gas Fixed Income 0,11 United States 4,30 USD
+NDAFH NORDEA BANK ABP MTN 144A Banking Fixed Income 0,11 Finland 4,22 USD
+USB US BANK NATIONAL ASSOCIATION FRN Banking Fixed Income 0,11 United States 4,30 USD
+PFG PRINCIPAL LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,11 United States 4,43 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,11 United Kingdom 4,57 USD
+KDP KEURIG DR PEPPER INC (FRN) Consumer Non-Cyclical Fixed Income 0,11 United States 4,59 USD
+ORCL ORACLE CORPORATION (FRN) Technology Fixed Income 0,11 United States 4,38 USD
+MS MORGAN STANLEY BANK NA(FRN) Banking Fixed Income 0,11 United States 4,60 USD
+GM GENERAL MOTORS FINANCIAL CO INC Consumer Cyclical Fixed Income 0,11 United States 4,72 USD
+F FORD MOTOR CREDIT COMPANY LLC (FRN Consumer Cyclical Fixed Income 0,11 United States 5,71 USD
+NWG NATWEST MARKETS PLC MTN 144A Banking Fixed Income 0,11 United Kingdom 4,55 USD
+GS GOLDMAN SACHS GROUP INC/THE Banking Fixed Income 0,11 United States 4,52 USD
+DNBNO DNB BANK ASA (FRN) MTN 144A Banking Fixed Income 0,11 Norway 4,68 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,11 United States 4,28 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,11 United States 4,10 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,11 Canada 0,00 USD
+SEB SKANDINAVISKA ENSKILDA BANKEN AB MTN 144A Banking Fixed Income 0,11 Sweden 4,69 USD
+HPE HEWLETT PACKARD ENTERPRISE CO Technology Fixed Income 0,11 United States 4,63 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,11 Netherlands 4,51 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP (FRN) MTN Consumer Cyclical Fixed Income 0,11 United States 4,07 USD
+PNC PNC BANK NA (FRN) Banking Fixed Income 0,11 United States 4,34 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,11 Netherlands 3,64 USD
+GS GOLDMAN SACHS GROUP INC/THE Banking Fixed Income 0,11 United States 4,44 USD
+NWIDE NATIONWIDE BUILDING SOCIETY MTN 144A Banking Fixed Income 0,11 United Kingdom 4,63 USD
+CM CANADIAN IMP BANK OF COM FRN Banking Fixed Income 0,11 Canada 4,56 USD
+ATH ATHENE GLOBAL FUNDING (FRN) MTN 144A Insurance Fixed Income 0,11 United States 4,43 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,11 United States 4,18 USD
+BPCEGP BPCE SA (FRN) MTN 144A Banking Fixed Income 0,11 France 5,59 USD
+CEG CONSTELLATION ENERGY GEN (FRN) Electric Fixed Income 0,11 United States 4,20 USD
+NWIDE NATIONWIDE BUILDING SOCIETY (FRN) MTN 144A Banking Fixed Income 0,11 United Kingdom 4,68 USD
+BACR BARCLAYS PLC (FRN) Banking Fixed Income 0,10 United Kingdom 5,59 USD
+USB US BANK NATIONAL ASSOCIATION (FRN) MTN Banking Fixed Income 0,10 United States 4,28 USD
+ATH ATHENE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,10 United States 4,66 USD
+HCA HCA INC Consumer Non-Cyclical Fixed Income 0,10 United States 4,52 USD
+MRK MERCK & CO INC Consumer Non-Cyclical Fixed Income 0,10 United States 3,99 USD
+BFCM BANQUE FEDERATIVE DU CREDIT MUTUEL 144A Banking Fixed Income 0,10 France 4,69 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,10 United States 4,50 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,10 United States 4,70 USD
+GS GOLDMAN SACHS GROUP INC (FRN) Banking Fixed Income 0,10 United States 5,47 USD
+EIBKOR EXPORT-IMPORT BANK OF KOREA Owned No Guarantee Fixed Income 0,10 Korea (South) 3,99 USD
+FG F&G GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,10 United States 4,98 USD
+GM GENERAL MOTORS FINANCIAL (FRN) Consumer Cyclical Fixed Income 0,10 United States 4,89 USD
+LGENSO LG ENERGY SOLUTION LTD 144A Consumer Cyclical Fixed Income 0,10 Korea (South) 5,18 USD
+HNDA AMERICAN HONDA FINANCE CORP (FRN) MTN Consumer Cyclical Fixed Income 0,10 United States 4,33 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,10 Canada 4,38 USD
+MA MASTERCARD INC Technology Fixed Income 0,10 United States 4,08 USD
+NIB NORDIC INVESTMENT BANK 144A Supranational Fixed Income 0,10 Supranational 3,89 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,10 Australia 4,20 USD
+NDAFH NORDEA BANK ABP (FRN) MTN 144A Banking Fixed Income 0,10 Finland 4,46 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,10 United States 4,01 USD
+BFCM BANQUE FEDERATIVE DU CREDIT MUTUEL MTN 144A Banking Fixed Income 0,10 France 4,61 USD
+IFC INTERNATIONAL FINANCE CORP MTN Supranational Fixed Income 0,10 Supranational 3,90 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,10 United States 4,53 USD
+MIZUHO MIZUHO FINANCIAL GROUP INC Banking Fixed Income 0,10 Japan 4,86 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,10 United States 4,05 USD
+BMW BMW US CAPITAL LLC 144A Consumer Cyclical Fixed Income 0,10 Germany 4,54 USD
+VW VOLKSWAGEN GROUP OF AMERICA FINANC 144A Consumer Cyclical Fixed Income 0,10 Germany 4,68 USD
+CADEPO CDP FINANCIAL INC 144A Local Authority Fixed Income 0,10 Canada 3,92 USD
+CRBG COREBRIDGE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,10 United States 4,49 USD
+MUFG MITSUBISHI UFJ FINANCIAL GROUP FRN Banking Fixed Income 0,10 Japan 4,43 USD
+RIOLN RIO TINTO FINANCE (USA) PLC Basic Industry Fixed Income 0,10 Australia 4,47 USD
+RY ROYAL BANK OF CANADA MTN Banking Fixed Income 0,10 Canada 4,21 USD
+GM GENERAL MOTORS FINANCIAL CO INC (F Consumer Cyclical Fixed Income 0,10 United States 4,83 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,10 United States 4,36 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,10 United States 4,64 USD
+STLA STELLANTIS FINANCE US INC (FRN) 144A Consumer Cyclical Fixed Income 0,09 United States 5,32 USD
+SANFP SANOFI SA MTN Consumer Non-Cyclical Fixed Income 0,09 United States 4,08 USD
+MS MORGAN STANLEY (FRN) MTN Banking Fixed Income 0,09 United States 4,72 USD
+JPM JPMORGAN CHASE & CO (FRN) MTN Banking Fixed Income 0,09 United States 4,47 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,09 United States 0,00 USD
+MIZUHO MIZUHO FINANCIAL GROUP INC (FRN) Banking Fixed Income 0,09 Japan 4,70 USD
+PM PHILIP MORRIS INTERNATIONAL INC Consumer Non-Cyclical Fixed Income 0,09 United States 4,48 USD
+TFC TRUIST BANK (FRN) Banking Fixed Income 0,09 United States 0,00 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,09 Canada 4,36 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,09 United States 4,21 USD
+MA MASTERCARD INC Technology Fixed Income 0,09 United States 4,03 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,09 United States 4,29 USD
+MET METROPOLITAN LIFE GLOBAL (FRN) MTN 144A Insurance Fixed Income 0,09 United States 4,33 USD
+ACN ACCENTURE CAPITAL INC Technology Fixed Income 0,09 United States 4,43 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,09 United States 4,64 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,09 United States 4,92 USD
+NACF NONGHYUP BANK MTN RegS Government Sponsored Fixed Income 0,09 Korea (South) 4,41 USD
+HYNMTR HYUNDAI CAPITAL AMERICA MTN 144A Consumer Cyclical Fixed Income 0,09 United States 4,74 USD
+NOMURA NOMURA HOLDINGS INC Brokerage/Asset Managers/Exchanges Fixed Income 0,09 Japan 4,73 USD
+NTT NTT FINANCE CORP 144A Communications Fixed Income 0,09 Japan 4,45 USD
+NWMLIC NORTHWESTERN MUTUAL GLOBAL (FRN) MTN 144A Insurance Fixed Income 0,09 United States 4,29 USD
+RY ROYAL BANK OF CANADA (FRN) MTN Banking Fixed Income 0,09 Canada 4,46 USD
+GS GOLDMAN SACHS GROUP INC (FRN) Banking Fixed Income 0,09 United States 3,61 USD
+HPE HEWLETT PACKARD ENTERPRISE CO Technology Fixed Income 0,09 United States 4,61 USD
+RDSALN SHELL FINANCE US INC Energy Fixed Income 0,09 United States 4,41 USD
+KDP KEURIG DR PEPPER INC Consumer Non-Cyclical Fixed Income 0,09 United States 4,21 USD
+GS GOLDMAN SACHS BANK USA (FRN) Banking Fixed Income 0,09 United States 4,35 USD
+STT STATE STREET CORP (FRN) Banking Fixed Income 0,09 United States 4,47 USD
+SANTAN BANCO SANTANDER SA (FRN) Banking Fixed Income 0,09 Spain 5,09 USD
+KHFC KOREA HOUSING FINANCE CORP MTN RegS Owned No Guarantee Fixed Income 0,09 Korea (South) 4,08 USD
+SANUK SANTANDER UK GROUP HOLD (FRN) Banking Fixed Income 0,09 United Kingdom 4,73 USD
+GM GENERAL MOTORS FINANCIAL CO INC Consumer Cyclical Fixed Income 0,08 United States 5,02 USD
+BAC MERRILL LYNCH & CO INC Banking Fixed Income 0,08 United States 4,69 USD
+TD TORONTO-DOMINION BANK/THE MTN Banking Fixed Income 0,08 Canada 4,54 USD
+MS MORGAN STANLEY BANK NA (FRN) Banking Fixed Income 0,08 United States 4,79 USD
+MBGGR MERCEDES-BENZ FINANCE NORTH (FRN) 144A Consumer Cyclical Fixed Income 0,08 Germany 4,33 USD
+BNS BANK OF NOVA SCOTIA (FRN) MTN Banking Fixed Income 0,08 Canada 4,70 USD
+NACF NONGHYUP BANK MTN RegS Government Sponsored Fixed Income 0,08 Korea (South) 4,29 USD
+SANTAN BANCO SANTANDER SA (FRN) Banking Fixed Income 0,08 Spain 4,74 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,08 Netherlands 4,22 USD
+BNY BANK OF NEW YORK MELLON CORP/THE MTN Banking Fixed Income 0,08 United States 4,31 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,08 United States 4,53 USD
+AXP AMERICAN EXPRESS COMPANY (FRN) Banking Fixed Income 0,08 United States 4,62 USD
+BFCM BANQUE FEDERATIVE DU CREDIT MUTUEL 144A Banking Fixed Income 0,08 France 4,75 USD
+PACLIF PACIFIC LIFE GLOBAL FUNDING II MTN 144A Insurance Fixed Income 0,08 United States 4,72 USD
+NWG NATWEST GROUP PLC Banking Fixed Income 0,08 United Kingdom 4,94 USD
+RY ROYAL BANK OF CANADA MTN Banking Fixed Income 0,08 Canada 4,26 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP (FRN) MTN Consumer Cyclical Fixed Income 0,08 United States 4,41 USD
+RABOBK COOPERATIEVE RABOBANK UA (NEW YORK MTN Banking Fixed Income 0,08 Netherlands 4,21 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,08 United States 4,34 USD
+ASBBNK ASB BANK LTD MTN 144A Banking Fixed Income 0,08 New Zealand 4,52 USD
+KOCRGF KODIT GLOBAL 2025-1 CO LTD RegS Government Sponsored Fixed Income 0,08 Korea (South) 4,27 USD
+CM CANADIAN IMPERIAL BANK (FRN) Banking Fixed Income 0,08 Canada 3,63 USD
+NRUC NATIONAL RURAL UTILITIES COOPERATI MTN Electric Fixed Income 0,08 United States 4,53 USD
+FITB FIFTH THIRD BANK NA (FRN) MTN Banking Fixed Income 0,08 United States 4,44 USD
+MITCO MITSUBISHI CORPORATION 144A Industrial Other Fixed Income 0,08 Japan 4,33 USD
+NWG NATWEST GROUP PLC Banking Fixed Income 0,07 United Kingdom 4,72 USD
+SANTAN BANCO SANTANDER SA Banking Fixed Income 0,07 Spain 4,58 USD
+SOCGEN SOCIETE GENERALE SA (FRN) MTN 144A Banking Fixed Income 0,07 France 4,72 USD
+MIZUHO MIZUHO FINANCIAL GROUP (FRN) Banking Fixed Income 0,07 Japan 4,44 USD
+NSCCLF NATIONAL SECURITIES CLEARING CORP 144A Brokerage/Asset Managers/Exchanges Fixed Income 0,07 United States 4,06 USD
+NAB NATIONAL AUSTRALIA BANK LTD MTN 144A Banking Fixed Income 0,07 Australia 4,17 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,07 United States 3,57 USD
+USB US BANK NATIONAL ASSOCIATION (FRN) MTN Banking Fixed Income 0,07 United States 4,53 USD
+STANLN STANDARD CHARTERED BANK (NEW YORK MTN Banking Fixed Income 0,07 United Kingdom 4,26 USD
+TOYOTA TOYOTA MOTOR CREDIT CORP MTN Consumer Cyclical Fixed Income 0,07 United States 4,22 USD
+BFCM BANQUE FEDERATIVE DU CREDIT MUTUEL MTN 144A Banking Fixed Income 0,07 France 4,43 USD
+CAT CATERPILLAR FINANCIAL SERV (FRN) MTN Capital Goods Fixed Income 0,07 United States 3,99 USD
+NRUC NATIONAL RURAL UTILITIES COOPERATI MTN Electric Fixed Income 0,07 United States 4,05 USD
+CRBG COREBRIDGE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,06 United States 4,36 USD
+APH AMPHENOL CORPORATION Capital Goods Fixed Income 0,06 United States 4,17 USD
+WFC WELLS FARGO BANK NA Banking Fixed Income 0,06 United States 4,69 USD
+GOOGL ALPHABET INC (FRN) Technology Fixed Income 0,06 United States 4,14 USD
+NDAFH NORDEA BANK ABP MTN 144A Banking Fixed Income 0,06 Finland 4,64 USD
+SEB SKANDINAVISKA ENSKILDA BANKEN AB MTN 144A Banking Fixed Income 0,06 Sweden 4,31 USD
+JXN JACKSON NATIONAL LIFE GLOBAL FUNDI MTN 144A Insurance Fixed Income 0,06 United States 4,54 USD
+STT STATE STREET CORP (FRN) Banking Fixed Income 0,06 United States 4,28 USD
+STT STATE STREET CORP (FRN) Banking Fixed Income 0,06 United States 4,59 USD
+HSBC HSBC USA INC Banking Fixed Income 0,06 United States 4,60 USD
+SOCGEN SOCIETE GENERALE SA (FRN) MTN 144A Banking Fixed Income 0,06 France 5,26 USD
+NYLIFE NEW YORK LIFE GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,06 United States 4,21 USD
+C CITIBANK NA (FRN) Banking Fixed Income 0,06 United States 4,13 USD
+ROSW ROCHE HOLDINGS INC (FRN) 144A Consumer Non-Cyclical Fixed Income 0,06 Switzerland 4,36 USD
+BNY BANK OF NEW YORK MELLON CORP(FRN) MTN Banking Fixed Income 0,06 United States 4,24 USD
+GBP GBP CASH Cash and/or Derivatives Cash 0,05 United Kingdom 0,00 GBP
+MRK MERCK & CO INC Consumer Non-Cyclical Fixed Income 0,05 United States 4,09 USD
+COE BANQUE DEVELOPPT CONSEIL EUROPE 9 MTN 144A Supranational Fixed Income 0,05 Supranational 3,88 USD
+KOROIL KOREA NATIONAL OIL CORP MTN RegS Owned No Guarantee Fixed Income 0,05 Korea (South) 4,29 USD
+HNDA AMERICAN HONDA FINANCE CORPORATION MTN Consumer Cyclical Fixed Income 0,05 United States 4,42 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,04 Supranational 4,06 USD
+SAMMON SAMMONS FINANCIAL GROUP GLOBAL FUN 144A Insurance Fixed Income 0,04 United States 4,47 USD
+KEBHNB KEB HANA BANK MTN RegS Banking Fixed Income 0,04 Korea (South) 4,21 USD
+DTRGR DAIMLER TRUCK FINANCE NORTH AMERIC 144A Consumer Cyclical Fixed Income 0,04 Germany 4,43 USD
+ASIA ASIAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,03 Supranational 4,68 USD
+CBAAU COMMONWEALTH BANK OF AUSTRALIA MTN 144A Banking Fixed Income 0,03 Australia 4,59 USD
+CAT CATERPILLAR FINANCIAL SERVICES COR MTN Capital Goods Fixed Income 0,03 United States 4,14 USD
+GLENLN GLENCORE FUNDING LLC 144A Basic Industry Fixed Income 0,03 Switzerland 4,37 USD
+UBS UBS AG (STAMFORD BRANCH) MTN Banking Fixed Income 0,03 Switzerland 4,12 USD
+SHBASS SVENSKA HANDELSBANKEN AB MTN 144A Banking Fixed Income 0,03 Sweden 4,37 USD
+RY ROYAL BANK OF CANADA MTN Banking Fixed Income 0,03 Canada 5,07 USD
+IBRD INTERNATIONAL BANK FOR RECONSTRUCT Supranational Fixed Income 0,03 Supranational 4,03 USD
+SO GEORGIA POWER COMPANY Electric Fixed Income 0,02 United States 4,04 USD
+WOORIB WOORI BANK MTN RegS Banking Fixed Income 0,02 Korea (South) 0,00 USD
+PFE PFIZER INC Consumer Non-Cyclical Fixed Income 0,02 United States 4,13 USD
+NSCCLF NATIONAL SECURITIES CLEARING (FRN) 144A Brokerage/Asset Managers/Exchanges Fixed Income 0,02 United States 3,64 USD
+BNG BNG BANK NV 144A Owned No Guarantee Fixed Income 0,02 Netherlands 4,76 USD
+BNG BNG BANK NV 144A Owned No Guarantee Fixed Income 0,02 Netherlands 4,63 USD
+KBN KOMMUNALBANKEN AS MTN 144A Owned No Guarantee Fixed Income 0,02 Norway 3,96 USD
+IADB INTER-AMERICAN DEVELOPMENT BANK MTN Supranational Fixed Income 0,02 Supranational 3,79 USD
+DE JOHN DEERE CAPITAL CORP MTN Capital Goods Fixed Income 0,02 United States 4,01 USD
+LGENSO LG ENERGY SOLUTION LTD RegS Consumer Cyclical Fixed Income 0,01 Korea (South) 5,18 USD
+CADEPO CDP FINANCIAL INC 144A Local Authority Fixed Income 0,01 Canada 4,13 USD
+TFC TRUIST BANK (FRN) Banking Fixed Income 0,01 United States 3,64 USD
+EUR EUR CASH Cash and/or Derivatives Cash 0,01 European Union 0,00 EUR
+CITNAT KOOKMIN BANK MTN RegS Banking Fixed Income 0,01 Korea (South) 4,10 USD
+CPPIBC CPPIB CAPITAL INC 144A Owned No Guarantee Fixed Income 0,01 Canada 4,03 USD
+EQH EQUITABLE AMERICA GLOBAL FUNDING MTN 144A Insurance Fixed Income 0,01 United States 4,34 USD
+BMO BANK OF MONTREAL Banking Fixed Income 0,01 Canada 3,64 USD
+MXN MXN CASH Cash and/or Derivatives Cash 0,00 Mexico 0,00 MXN
+PSPCAP PSP CAPITAL INC 144A Owned No Guarantee Fixed Income 0,00 Canada 3,97 USD
+SUMIBK SUMITOMO MITSUI FINANCIAL FRN Banking Fixed Income 0,00 Japan 4,80 USD
+C CITIGROUP INC (FRN) Banking Fixed Income 0,00 United States 3,62 USD
+NRUC NATIONAL RURAL UTILITIES COOPERATI MTN Electric Fixed Income 0,00 United States 4,18 USD
+USD USD CASH Cash and/or Derivatives Cash -0,10 United States 0,00 USD
+"""
+
+with open("scripts/floa_raw.txt", "w", encoding="utf-8") as f:
+    f.write(raw_text)
+print("Saved scripts/floa_raw.txt")
