@@ -132,7 +132,7 @@ export const fetchLatestPrices = async (assets: Asset[]): Promise<Record<string,
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ assets }),
-      signal: AbortSignal.timeout(15000)
+      signal: AbortSignal.timeout(30000)
     });
 
     if (response.ok) {
@@ -227,7 +227,7 @@ export const fetchYahooExchangeRates = async (): Promise<{
 } | null> => {
   // 1. Încercăm mai întâi prin API-ul de server
   try {
-    const res = await fetch('/api/exchange-rates', { signal: AbortSignal.timeout(4000) });
+    const res = await fetch('/api/exchange-rates', { signal: AbortSignal.timeout(10000) });
     if (res.ok) {
       const data = await res.json();
       if (data && data.eur && data.usd) {
