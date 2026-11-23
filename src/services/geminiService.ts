@@ -227,7 +227,7 @@ export const getCachedFullReport = (contextId: string): CachedAnalysis | null =>
 export const saveCachedFullReport = (
   contextId: string,
   text: string,
-  model: string = 'gemini-2.5-flash'
+  model: string = 'gemini-flash-lite-latest'
 ): CachedAnalysis => {
   const entry: CachedAnalysis = {
     text,

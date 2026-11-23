@@ -44,10 +44,12 @@ function getAiClient(referer?: string) {
   });
 }
 
-// Helper to call Gemini with exponential backoff and automatic lightweight model fallback on transient errors (503/429)
-async function generateContentWithRetry(client: any, params: any, maxRetries = 3, initialDelay = 1500) {
-  const originalModel = params.model || "gemini-2.5-flash";
-  const modelsToTry = [originalModel, "gemini-2.5-flash", "gemini-2.5-flash-lite"];
+// Helper to call Gemini with per-attempt timeout, exponential backoff, and automatic model fallback (503/429/404/timeout)
+const DEFAULT_GEMINI_MODEL = "gemini-flash-lite-latest";
+
+async function generateContentWithRetry(client: any, params: any, maxRetries = 1, initialDelay = 800) {
+  const originalModel = params.model || DEFAULT_GEMINI_MODEL;
+  const modelsToTry = [originalModel, "gemini-flash-lite-latest", "gemini-3.5-flash-lite", "gemini-3.1-flash-lite", "gemini-flash-latest"];
   const uniqueModels = Array.from(new Set(modelsToTry));
 
   for (let m = 0; m < uniqueModels.length; m++) {
@@ -57,22 +59,37 @@ async function generateContentWithRetry(client: any, params: any, maxRetries = 3
       try {
         const baseConfig = { ...(params.config || {}) };
         delete baseConfig.tools;
-        if (modelCandidate === "gemini-2.5-flash") {
-          baseConfig.thinkingConfig = { thinkingBudget: 0 };
-        } else {
-          delete baseConfig.thinkingConfig;
-        }
+        delete baseConfig.thinkingConfig;
 
-        return await client.models.generateContent({
-          ...params,
-          model: modelCandidate,
-          config: baseConfig
-        });
+        const timeoutMs = 20000;
+        return await Promise.race([
+          client.models.generateContent({
+            ...params,
+            model: modelCandidate,
+            config: baseConfig
+          }),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error(`TIMEOUT_${timeoutMs}ms`)), timeoutMs)
+          )
+        ]);
       } catch (error: any) {
         attempt++;
         const errorMessage = String(error?.message || "");
         const errorStatus = String(error?.status || "");
         const errorCode = error?.code || error?.status_code || 0;
+
+        const isNotFoundOrTimeout =
+          errorMessage.includes("404") ||
+          errorMessage.includes("NOT_FOUND") ||
+          errorStatus.includes("NOT_FOUND") ||
+          errorCode === 404 ||
+          errorMessage.includes("TIMEOUT_") ||
+          errorMessage.includes("fetch failed");
+
+        // If model is unavailable/deprecated or hung, immediately try the next fallback model
+        if (isNotFoundOrTimeout && m < uniqueModels.length - 1) {
+          break;
+        }
 
         const isTransient =
           errorMessage.includes("503") ||
@@ -843,7 +860,7 @@ app.post("/api/gemini/analyze", async (req, res) => {
     const prompt = `Date portofoliu:${JSON.stringify(compactData)}\nFormat Markdown:\n### Scor: X/10\n### Riscuri (max 3)\n### Rebalansare (max 3)`;
 
     const response = await generateContentWithRetry(client, {
-      model: "gemini-2.5-flash",
+      model: DEFAULT_GEMINI_MODEL,
       contents: prompt,
       config: {
         systemInstruction: `Analist financiar de portofoliu. ${CONCISE_SYSTEM_RULE}`,
@@ -877,7 +894,7 @@ app.post("/api/gemini/chat", async (req, res) => {
     const prompt = `Portofoliu:${JSON.stringify(compactData)}\nÎntrebare:${question}`;
 
     const response = await generateContentWithRetry(client, {
-      model: "gemini-2.5-flash",
+      model: DEFAULT_GEMINI_MODEL,
       contents: prompt,
       config: {
         systemInstruction,
@@ -917,7 +934,7 @@ Generează raportul Markdown exact în structura:
 ### Acțiuni Rebalansare (max 3-4 puncte concrete cu simboluri)`;
 
     const response = await generateContentWithRetry(client, {
-      model: "gemini-2.5-flash",
+      model: DEFAULT_GEMINI_MODEL,
       contents: prompt,
       config: {
         systemInstruction,

@@ -137,7 +137,7 @@ export const FullPortfolioReportModal: React.FC<FullPortfolioReportModalProps> =
       );
       setReportText(res);
       if (res && !res.startsWith('Eroare')) {
-        const saved = saveCachedFullReport(activePortfolioId, res, 'gemini-2.5-flash');
+        const saved = saveCachedFullReport(activePortfolioId, res, 'gemini-flash-lite-latest');
         setLastUpdatedAt(saved.updatedAt);
       }
     } catch (error) {
