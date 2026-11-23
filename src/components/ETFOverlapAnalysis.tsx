@@ -345,24 +345,60 @@ export const GLOBAL_COMPANY_ALIASES: Record<string, { key: string; symbol: strin
   'RIO.L': { key: 'RIO_TINTO', symbol: 'RIO', name: 'Rio Tinto PLC' },
   'RIO.AX': { key: 'RIO_TINTO', symbol: 'RIO', name: 'Rio Tinto PLC' },
   'GB0007188757': { key: 'RIO_TINTO', symbol: 'RIO', name: 'Rio Tinto PLC' },
+
+  // Alphabet (Class A & Class C)
+  'GOOGL': { key: 'ALPHABET', symbol: 'GOOGL', name: 'Alphabet Inc' },
+  'GOOG': { key: 'ALPHABET', symbol: 'GOOGL', name: 'Alphabet Inc' },
+  'US02079K3059': { key: 'ALPHABET', symbol: 'GOOGL', name: 'Alphabet Inc' },
+  'US02079K1079': { key: 'ALPHABET', symbol: 'GOOGL', name: 'Alphabet Inc' },
+
+  // Berkshire Hathaway (Class B)
+  'BRK.B': { key: 'BERKSHIRE', symbol: 'BRK.B', name: 'Berkshire Hathaway Inc' },
+  'BRKB': { key: 'BERKSHIRE', symbol: 'BRK.B', name: 'Berkshire Hathaway Inc' },
+  'BRK-B': { key: 'BERKSHIRE', symbol: 'BRK.B', name: 'Berkshire Hathaway Inc' },
+
+  // Cameco Corp (NYSE CCJ / TSX CCO)
+  'CCJ': { key: 'CAMECO', symbol: 'CCJ', name: 'Cameco Corp' },
 };
 
 // Uniquely identifies a company across global exchanges and local markets (e.g. BVB Romania vs US/EU)
-// Prevents collisions like Transelectrica (TEL.RO) vs TE Connectivity (TEL) or Electrica (EL.RO) vs Estée Lauder (EL)
+// Prevents collisions like Transelectrica (TEL.RO) vs TE Connectivity (TEL), Electrica (EL.RO) vs Estée Lauder (EL),
+// or corporate bonds (Fixed Income) vs equity shares of the same issuer (e.g. Apple bond in ERNX vs AAPL stock)
 export const getCompanyUniqueKey = (item: {
   symbol?: string;
+  ticker?: string;
   name?: string;
   isin?: string;
   location?: string;
+  country?: string;
   currency?: string;
-}): string => {
+  assetClass?: string;
+  type?: string;
+}, isFixedIncomeContext = false): string => {
   if (!item) return '';
 
-  const rawSymbol = (item.symbol || '').toUpperCase().trim();
+  const rawSymbol = (item.symbol || item.ticker || '').toUpperCase().trim();
   const name = (item.name || '').toUpperCase().trim();
-  const location = (item.location || '').toUpperCase().trim();
+  const location = (item.location || item.country || '').toUpperCase().trim();
   const currency = (item.currency || '').toUpperCase().trim();
   const isin = (item.isin || '').toUpperCase().trim();
+  const assetClass = (item.assetClass || '').toLowerCase().trim();
+
+  // Keep Fixed Income / Bond instruments strictly separated from Equity shares
+  const isFixedIncome =
+    isFixedIncomeContext ||
+    assetClass === 'fixed income' ||
+    assetClass === 'money market' ||
+    item.type === AssetType.BOND;
+
+  if (isFixedIncome) {
+    const baseFi = normalizeYahooTicker(rawSymbol);
+    if (baseFi && baseFi.length > 0) return `FI:${baseFi}`;
+    if (isin && isin.length >= 10) return `FI:${isin}`;
+    const normName = normalizeCompanyName(name);
+    if (normName) return `FI:${normName}`;
+    return 'FI:UNKNOWN';
+  }
 
   // 0. Check ISIN first against global alias dictionary
   if (isin && GLOBAL_COMPANY_ALIASES[isin]) {
@@ -397,6 +433,9 @@ export const getCompanyUniqueKey = (item: {
     if (name.includes('MOET HENNESSY') || name.includes('LVMH')) return 'LVMH';
     if (name.includes('TOTALENERGIES') || name.includes('TOTAL SA')) return 'TOTALENERGIES';
     if (name.includes('RIO TINTO')) return 'RIO_TINTO';
+    if (name.includes('ALPHABET INC')) return 'ALPHABET';
+    if (name.includes('CAMECO')) return 'CAMECO';
+    if (name.includes('BERKSHIRE HATHAWAY')) return 'BERKSHIRE';
   }
 
   // List of Bucharest Stock Exchange (BVB) symbols
@@ -2134,6 +2173,12 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
   const [portfolioFilter, setPortfolioFilter] = useState<string>('all'); // 'all' or portfolio ID
   const [isModalOpen, setIsModalOpen] = useState(false);
 
+  // Sync internal portfolio filter when top-level active portfolio changes
+  useEffect(() => {
+    setPortfolioFilter('all');
+    setSelectedCompany(null);
+  }, [activePortfolioId]);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isModalOpen) {
@@ -2172,10 +2217,17 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
           const isIncompleteHoldings = savedEtf && savedEtf.holdings && defaultEtf.holdings &&
             (savedEtf.holdings.length < defaultEtf.holdings.length);
 
+          const hasLegacySchema = savedEtf && (
+            (savedEtf.holdings && savedEtf.holdings.some((h: any) => !h.symbol)) ||
+            (savedEtf.sectors && savedEtf.sectors.some((s: any) => !s.name)) ||
+            (savedEtf.countries && savedEtf.countries.some((c: any) => !c.name))
+          );
+
           if (
             !savedEtf ||
             hasDummyHoldings ||
             isIncompleteHoldings ||
+            hasLegacySchema ||
             (defaultEtf.lastUpdated && (!savedEtf.lastUpdated || defaultEtf.lastUpdated >= savedEtf.lastUpdated)) ||
             (defaultEtf.sectors && defaultEtf.sectors.length > 0 && (!savedEtf.sectors || savedEtf.sectors.length === 0))
           ) {
@@ -2327,27 +2379,52 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
       const etfData = matchKey ? etfDatabase[matchKey] : null;
 
       const etfVal = convertValue(asset.quantity * asset.currentPrice, asset.currency, currency);
+      const isFixedIncomeEtf =
+        asset.type === AssetType.BOND ||
+        (etfData?.category || '').toLowerCase().includes('fixed income') ||
+        (etfData?.category || '').toLowerCase().includes('bond');
 
       if (etfData && etfData.holdings && etfData.holdings.length > 0) {
-        // Track seen holdings inside this specific ETF to avoid processing duplicate holding records within the same ETF dataset
-        const seenHoldingsInEtf = new Set<string>();
+        // Aggregate duplicate holding keys inside this ETF by SUMMING positive weights (never drop bonds/share-classes!)
+        const aggregatedHoldings = new Map<string, { holding: any; weight: number }>();
+        let totalPositiveWeight = 0;
 
-        etfData.holdings.forEach(h => {
-          const uniqueKey = getCompanyUniqueKey(h);
-          if (seenHoldingsInEtf.has(uniqueKey)) return;
-          seenHoldingsInEtf.add(uniqueKey);
+        etfData.holdings.forEach((h: any) => {
+          const w = Number(h.weight) || 0;
+          if (w <= 0) return;
+          const uniqueKey = getCompanyUniqueKey(h, isFixedIncomeEtf);
+          if (!uniqueKey) return;
+          totalPositiveWeight += w;
 
-          const normSym = formatNumericTicker(h.symbol, h.location, h.name);
-          const compVal = etfVal * (h.weight / 100);
+          const existingAgg = aggregatedHoldings.get(uniqueKey);
+          if (existingAgg) {
+            existingAgg.weight += w;
+          } else {
+            aggregatedHoldings.set(uniqueKey, { holding: h, weight: w });
+          }
+        });
 
-          const rawHSym = (h.symbol || '').toUpperCase().trim();
-          const aliasMatch =
-            GLOBAL_COMPANY_ALIASES[rawHSym] ||
-            GLOBAL_COMPANY_ALIASES[normSym] ||
-            (h.isin ? GLOBAL_COMPANY_ALIASES[h.isin.toUpperCase().trim()] : null);
+        // If raw holding weights exceed 100% (e.g. IS3N 102.4%, XHYA 101.28%), scale down proportionally so look-through never exceeds 100% of ETF value
+        const weightScale = totalPositiveWeight > 100 ? (100 / totalPositiveWeight) : 1;
+
+        aggregatedHoldings.forEach(({ holding: h, weight: rawWeight }, uniqueKey) => {
+          const effectiveWeight = rawWeight * weightScale;
+          const rawHSym = (h.symbol || h.ticker || '').toUpperCase().trim();
+          const normSym = formatNumericTicker(rawHSym, h.location || h.country, h.name);
+          const compVal = etfVal * (effectiveWeight / 100);
+
+          const aliasMatch = !isFixedIncomeEtf
+            ? (GLOBAL_COMPANY_ALIASES[rawHSym] ||
+               GLOBAL_COMPANY_ALIASES[normSym] ||
+               (h.isin ? GLOBAL_COMPANY_ALIASES[h.isin.toUpperCase().trim()] : null))
+            : null;
 
           const prefSymbol = aliasMatch ? aliasMatch.symbol : normSym;
-          const prefName = aliasMatch ? aliasMatch.name : (h.name || normSym);
+          const prefName = aliasMatch
+            ? aliasMatch.name
+            : (isFixedIncomeEtf && h.name && !h.name.toLowerCase().includes('bond') && !h.name.toLowerCase().includes('treas') && !h.name.toLowerCase().includes('bill') && !h.name.toLowerCase().includes('mtn') && !h.name.toLowerCase().includes('fund')
+                ? `${h.name} (Bond)`
+                : (h.name || normSym));
 
           if (!map[uniqueKey]) {
             map[uniqueKey] = {
@@ -2370,16 +2447,17 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
           map[uniqueKey].indirectValue += compVal;
           map[uniqueKey].totalValue += compVal;
 
-          // Consolidate ETF source to prevent duplicate ETF rows (e.g. IS3N.DE appearing twice for the same company)
+          // Consolidate ETF source across portfolios (e.g. SXR8.DE in P2 + P3)
           const existingSource = map[uniqueKey].etfSources.find(s => s.etfSymbol === asset.symbol);
           if (existingSource) {
+            existingSource.etfValue += etfVal;
             existingSource.companyValueFromEtf += compVal;
           } else {
             map[uniqueKey].etfSources.push({
               etfSymbol: asset.symbol,
               etfName: asset.name || etfData.name,
               etfValue: etfVal,
-              companyWeightInEtf: h.weight,
+              companyWeightInEtf: Number(effectiveWeight.toFixed(2)),
               companyValueFromEtf: compVal
             });
           }
@@ -2435,47 +2513,55 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
       .map(item => {
         // Direct shares count
         const directShares = item.directSources.reduce((sum, ds) => sum + ds.quantity, 0);
+        const isFixedIncomeItem = item.uniqueKey.startsWith('FI:');
 
-        // Find unit share price in reporting currency
+        // Find unit share price in reporting currency (skip bogus share estimation for Fixed Income bonds / Gold bullion)
         let unitPriceInReportingCurrency = 0;
         if (directShares > 0 && item.directValue > 0) {
           unitPriceInReportingCurrency = item.directValue / directShares;
-        } else {
+        } else if (!isFixedIncomeItem && item.normalizedSymbol !== 'GOLD') {
           // Check if asset exists in openAssets or assets via fast O(1) Map lookup
           const matchAsset = assetsByNormSymbolMap.get(item.normalizedSymbol);
           if (matchAsset && matchAsset.currentPrice > 0) {
             unitPriceInReportingCurrency = convertValue(matchAsset.currentPrice, matchAsset.currency, currency);
           } else {
-            // Reference prices for popular global tickers
+            // Reference prices for popular global tickers when not held directly
             const POPULAR_PRICES: Record<string, { price: number; curr: string }> = {
-              'NVDA': { price: 120, curr: 'USD' },
-              'AAPL': { price: 225, curr: 'USD' },
-              'MSFT': { price: 440, curr: 'USD' },
-              'AMZN': { price: 185, curr: 'USD' },
-              'GOOGL': { price: 175, curr: 'USD' },
-              'GOOG': { price: 175, curr: 'USD' },
-              'META': { price: 500, curr: 'USD' },
-              'TSLA': { price: 220, curr: 'USD' },
-              'AVGO': { price: 160, curr: 'USD' },
-              'LLY': { price: 800, curr: 'USD' },
-              'JPM': { price: 210, curr: 'USD' },
-              'PLTR': { price: 28, curr: 'USD' },
-              'RTX': { price: 120, curr: 'USD' },
-              'LMT': { price: 550, curr: 'USD' },
-              'RHM': { price: 500, curr: 'EUR' },
-              'BA': { price: 580, curr: 'GBP' },
-              'HO': { price: 160, curr: 'EUR' },
-              'LDO': { price: 22, curr: 'EUR' },
-              'AIR': { price: 135, curr: 'EUR' },
-              'SAF': { price: 200, curr: 'EUR' },
-              'SAAB': { price: 240, curr: 'SEK' },
-              'ESLT': { price: 200, curr: 'USD' },
-              'CW': { price: 290, curr: 'USD' },
-              'TLV': { price: 28, curr: 'RON' },
-              'SNP': { price: 0.70, curr: 'RON' },
-              'SNG': { price: 6.0, curr: 'RON' },
-              'H2O': { price: 120, curr: 'RON' },
-              'DIGI': { price: 65, curr: 'RON' },
+              'NVDA': { price: 185, curr: 'USD' },
+              'AAPL': { price: 245, curr: 'USD' },
+              'MSFT': { price: 450, curr: 'USD' },
+              'AMZN': { price: 225, curr: 'USD' },
+              'GOOGL': { price: 205, curr: 'USD' },
+              'GOOG': { price: 205, curr: 'USD' },
+              'META': { price: 640, curr: 'USD' },
+              'TSLA': { price: 320, curr: 'USD' },
+              'AVGO': { price: 230, curr: 'USD' },
+              'LLY': { price: 850, curr: 'USD' },
+              'JPM': { price: 265, curr: 'USD' },
+              'PLTR': { price: 115, curr: 'USD' },
+              'TSM': { price: 205, curr: 'USD' },
+              'ASML': { price: 720, curr: 'EUR' },
+              'SAP': { price: 265, curr: 'EUR' },
+              'MC.PA': { price: 650, curr: 'EUR' },
+              'BRK.B': { price: 485, curr: 'USD' },
+              'RTX': { price: 130, curr: 'USD' },
+              'LMT': { price: 490, curr: 'USD' },
+              'RHM': { price: 1400, curr: 'EUR' },
+              'BA': { price: 180, curr: 'USD' },
+              'HO': { price: 240, curr: 'EUR' },
+              'LDO': { price: 45, curr: 'EUR' },
+              'AIR': { price: 165, curr: 'EUR' },
+              'SAF': { price: 240, curr: 'EUR' },
+              'SAAB': { price: 380, curr: 'SEK' },
+              'ESLT': { price: 380, curr: 'USD' },
+              'CW': { price: 350, curr: 'USD' },
+              'TLV': { price: 31, curr: 'RON' },
+              'SNP': { price: 0.78, curr: 'RON' },
+              'SNG': { price: 6.2, curr: 'RON' },
+              'H2O': { price: 122, curr: 'RON' },
+              'DIGI': { price: 68, curr: 'RON' },
+              'BRD': { price: 19, curr: 'RON' },
+              'TGN': { price: 29, curr: 'RON' },
             };
             if (POPULAR_PRICES[item.normalizedSymbol]) {
               unitPriceInReportingCurrency = convertValue(
@@ -2613,39 +2699,95 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
     const list: {
       etf1: { symbol: string; name: string; value: number };
       etf2: { symbol: string; name: string; value: number };
-      sharedHoldings: { symbol: string; name: string; weightInEtf1: number; weightInEtf2: number }[];
-      overlapPercent: number; // sum of min shared weights
+      sharedHoldings: { uniqueKey: string; symbol: string; name: string; weightInEtf1: number; weightInEtf2: number }[];
+      overlapPercent: number; // sum of min shared weights (capped cleanly to 0-100%)
     }[] = [];
 
-    const etfAssetList = userEtfAssets.map(a => {
+    // 1. Consolidate identical ETFs held across multiple portfolios (e.g. SXR8.DE in P2 + P3) to eliminate self-overlap & duplicate pairs
+    const consolidatedEtfs = new Map<string, {
+      matchKey: string;
+      symbol: string;
+      name: string;
+      value: number;
+      isFixedIncome: boolean;
+      isCommodity: boolean;
+      holdingsMap: Map<string, { symbol: string; name: string; weight: number }>;
+    }>();
+
+    userEtfAssets.forEach(a => {
       const matchKey = findEtfDatabaseKey(a.symbol, etfDatabase);
       const etfData = matchKey ? etfDatabase[matchKey] : null;
-      return {
-        asset: a,
-        data: etfData,
-        value: convertValue(a.quantity * a.currentPrice, a.currency, currency)
-      };
-    }).filter(e => e.data && e.data.holdings);
+      if (!etfData || !etfData.holdings || etfData.holdings.length === 0) return;
 
-    for (let i = 0; i < etfAssetList.length; i++) {
-      for (let j = i + 1; j < etfAssetList.length; j++) {
-        const e1 = etfAssetList[i];
-        const e2 = etfAssetList[j];
+      const val = convertValue(a.quantity * a.currentPrice, a.currency, currency);
+      const existing = consolidatedEtfs.get(matchKey);
+      if (existing) {
+        existing.value += val;
+        return;
+      }
 
-        const shared: { symbol: string; name: string; weightInEtf1: number; weightInEtf2: number }[] = [];
+      const catLower = (etfData.category || '').toLowerCase();
+      const isFixedIncome = a.type === AssetType.BOND || catLower.includes('fixed income') || catLower.includes('bond');
+      const isCommodity = a.type === AssetType.COMMODITY || catLower.includes('commodit') || catLower.includes('gold');
+
+      // Pre-aggregate holdings by uniqueKey (summing positive weights, normalizing if > 100%)
+      const rawMap = new Map<string, { symbol: string; name: string; weight: number }>();
+      let totalPosWeight = 0;
+      etfData.holdings.forEach((h: any) => {
+        const w = Number(h.weight) || 0;
+        if (w <= 0) return;
+        const uk = getCompanyUniqueKey(h, isFixedIncome);
+        if (!uk) return;
+        totalPosWeight += w;
+        const rawSym = (h.symbol || h.ticker || '').toUpperCase().trim();
+        const alias = !isFixedIncome ? (GLOBAL_COMPANY_ALIASES[rawSym] || GLOBAL_COMPANY_ALIASES[normalizeYahooTicker(rawSym)]) : null;
+        const dispSym = alias ? alias.symbol : formatNumericTicker(rawSym, h.location || h.country, h.name);
+        const dispName = alias ? alias.name : (h.name || dispSym);
+        const exH = rawMap.get(uk);
+        if (exH) {
+          exH.weight += w;
+        } else {
+          rawMap.set(uk, { symbol: dispSym, name: dispName, weight: w });
+        }
+      });
+
+      const scale = totalPosWeight > 100 ? (100 / totalPosWeight) : 1;
+      const holdingsMap = new Map<string, { symbol: string; name: string; weight: number }>();
+      rawMap.forEach((v, k) => {
+        holdingsMap.set(k, { ...v, weight: Number((v.weight * scale).toFixed(2)) });
+      });
+
+      consolidatedEtfs.set(matchKey, {
+        matchKey,
+        symbol: a.symbol,
+        name: a.name || etfData.name,
+        value: val,
+        isFixedIncome,
+        isCommodity,
+        holdingsMap
+      });
+    });
+
+    const etfList = Array.from(consolidatedEtfs.values());
+
+    // 2. Pairwise overlap only within compatible asset classes (Equity vs Equity, Fixed Income vs Fixed Income)
+    for (let i = 0; i < etfList.length; i++) {
+      for (let j = i + 1; j < etfList.length; j++) {
+        const e1 = etfList[i];
+        const e2 = etfList[j];
+
+        // Skip cross-asset-class comparisons (e.g. Bond ETF vs Equity ETF or Gold ETC vs Equity ETF)
+        if (e1.isFixedIncome !== e2.isFixedIncome || e1.isCommodity !== e2.isCommodity) continue;
+
+        const shared: { uniqueKey: string; symbol: string; name: string; weightInEtf1: number; weightInEtf2: number }[] = [];
         let totalSharedWeight = 0;
 
-        const e2HoldingsMap = new Map<string, typeof e2.data.holdings[0]>();
-        e2.data!.holdings.forEach(x => {
-          e2HoldingsMap.set(getCompanyUniqueKey(x), x);
-        });
-
-        e1.data!.holdings.forEach(h1 => {
-          const key1 = getCompanyUniqueKey(h1);
-          const h2 = e2HoldingsMap.get(key1);
+        e1.holdingsMap.forEach((h1, uk) => {
+          const h2 = e2.holdingsMap.get(uk);
           if (h2) {
             shared.push({
-              symbol: normalizeYahooTicker(h1.symbol),
+              uniqueKey: uk,
+              symbol: h1.symbol,
               name: h1.name,
               weightInEtf1: h1.weight,
               weightInEtf2: h2.weight
@@ -2655,15 +2797,15 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
         });
 
         list.push({
-          etf1: { symbol: e1.asset.symbol, name: e1.asset.name || e1.data!.name, value: e1.value },
-          etf2: { symbol: e2.asset.symbol, name: e2.asset.name || e2.data!.name, value: e2.value },
-          sharedHoldings: shared.sort((a,b) => Math.max(b.weightInEtf1, b.weightInEtf2) - Math.max(a.weightInEtf1, a.weightInEtf2)),
-          overlapPercent: totalSharedWeight
+          etf1: { symbol: e1.symbol, name: e1.name, value: e1.value },
+          etf2: { symbol: e2.symbol, name: e2.name, value: e2.value },
+          sharedHoldings: shared.sort((a, b) => Math.max(b.weightInEtf1, b.weightInEtf2) - Math.max(a.weightInEtf1, a.weightInEtf2)),
+          overlapPercent: Math.min(100, totalSharedWeight)
         });
       }
     }
 
-    return list.sort((a,b) => b.overlapPercent - a.overlapPercent);
+    return list.sort((a, b) => b.overlapPercent - a.overlapPercent);
   }, [userEtfAssets, etfDatabase, convertValue, currency]);
 
   // --- TER COST & OPTIMIZATION CALCULATION ---
@@ -2787,10 +2929,16 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
               onChange={(e) => setPortfolioFilter(e.target.value)}
               className="bg-slate-900 text-white font-bold px-2.5 py-1 rounded-lg border border-slate-700 outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer"
             >
-              <option value="all">Toate cele {portfolios.length} portofolii (Cumulat)</option>
-              {portfolios.map(p => (
-                <option key={p.id} value={p.id}>{p.name}</option>
-              ))}
+              {portfolios.length > 1 ? (
+                <>
+                  <option value="all">Toate cele {portfolios.length} portofolii (Cumulat)</option>
+                  {portfolios.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </>
+              ) : (
+                <option value="all">{portfolios[0]?.name || 'Portofoliu Activ'}</option>
+              )}
             </select>
           </div>
 
@@ -3117,11 +3265,11 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
                           </tr>
                         )}
                         {filteredCompanies.map((comp) => {
-                          const isSelected = selectedCompany === comp.normalizedSymbol;
+                          const isSelected = selectedCompany === comp.uniqueKey;
                           return (
-                            <React.Fragment key={comp.normalizedSymbol}>
+                            <React.Fragment key={comp.uniqueKey}>
                               <tr
-                                onClick={() => setSelectedCompany(isSelected ? null : comp.normalizedSymbol)}
+                                onClick={() => setSelectedCompany(isSelected ? null : comp.uniqueKey)}
                                 className={`hover:bg-slate-800/60 transition-colors cursor-pointer ${
                                   isSelected ? 'bg-slate-800/80 border-l-4 border-l-emerald-500' : ''
                                 }`}
@@ -3190,7 +3338,7 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation();
-                                      setSelectedCompany(isSelected ? null : comp.normalizedSymbol);
+                                      setSelectedCompany(isSelected ? null : comp.uniqueKey);
                                     }}
                                     className="text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md transition-colors inline-flex items-center gap-1"
                                   >
@@ -3251,7 +3399,8 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
                                           {comp.etfSources.length > 0 ? (
                                             <ul className="space-y-2 text-xs text-slate-300">
                                               {comp.etfSources.map((es, idx) => {
-                                                const etfData = etfDatabase[es.etfSymbol] || etfDatabase[normalizeYahooTicker(es.etfSymbol)];
+                                                const etfMatchKey = findEtfDatabaseKey(es.etfSymbol, etfDatabase);
+                                                const etfData = (etfMatchKey ? etfDatabase[etfMatchKey] : null) || etfDatabase[es.etfSymbol] || etfDatabase[normalizeYahooTicker(es.etfSymbol)];
                                                 const officialUrl = etfData?.officialSourceUrl || (etfData?.isin ? `https://www.justetf.com/en/search.html?search=${etfData.isin}` : null);
                                                 return (
                                                   <li key={idx} className="flex flex-col border-b border-slate-800/60 pb-2 space-y-1">
@@ -3426,7 +3575,7 @@ export const ETFOverlapAnalysis: React.FC<ETFOverlapAnalysisProps> = ({
                             {pair.sharedHoldings.length > 0 ? (
                               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
                                 {pair.sharedHoldings.map((sh) => (
-                                  <div key={sh.symbol} className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded border border-slate-800">
+                                  <div key={sh.uniqueKey || sh.symbol} className="flex justify-between items-center text-xs bg-slate-900 p-2 rounded border border-slate-800">
                                     <span className="font-bold text-white">{sh.symbol} <span className="text-slate-400 font-normal">({sh.name})</span></span>
                                     <div className="font-mono text-[11px] text-slate-300">
                                       <span className="text-emerald-400">{sh.weightInEtf1}%</span> în {pair.etf1.symbol} | <span className="text-blue-400">{sh.weightInEtf2}%</span> în {pair.etf2.symbol}

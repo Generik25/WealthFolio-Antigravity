@@ -1,7 +1,7 @@
 // iShares $ Floating Rate Bond UCITS ETF USD (Acc) - ISIN: IE00BDFGJ627
 // Full holdings list (~553 holdings) updated July 2026
 
-export interface ETFHolding {
+export interface RawBondHolding {
   name: string;
   ticker: string;
   weight: number;
@@ -12,17 +12,22 @@ export interface ETFHolding {
   currency?: string;
 }
 
+export interface ETFHolding extends RawBondHolding {
+  symbol: string;
+  location?: string;
+}
+
 export interface SectorAllocation {
-  sector: string;
+  name: string;
   weight: number;
 }
 
 export interface CountryAllocation {
-  country: string;
+  name: string;
   weight: number;
 }
 
-export const FLOA_FULL_HOLDINGS: ETFHolding[] = [
+const FLOA_RAW_HOLDINGS: RawBondHolding[] = [
   {
     "name": "ICS USD LEAF AGENCY DIST",
     "ticker": "BLK",
@@ -5605,99 +5610,45 @@ export const FLOA_FULL_HOLDINGS: ETFHolding[] = [
   }
 ];
 
+export const FLOA_FULL_HOLDINGS: ETFHolding[] = FLOA_RAW_HOLDINGS.map(h => ({
+  ...h,
+  symbol: h.ticker,
+  location: h.country
+}));
+
 export const FLOA_SECTOR_ALLOCATIONS: SectorAllocation[] = [
-  { sector: 'Banking', weight: 48.54 },
-  { sector: 'Supranational', weight: 20.28 },
-  { sector: 'Consumer Cyclical', weight: 8.76 },
-  { sector: 'Owned No Guarantee', weight: 5.81 },
-  { sector: 'Insurance', weight: 4.88 },
-  { sector: 'Other', weight: 3.57 },
-  { sector: 'Consumer Non-Cyclical', weight: 3.01 },
-  { sector: 'Capital Goods', weight: 2.56 },
-  { sector: 'Technology', weight: 1.03 },
-  { sector: 'Electric', weight: 0.79 },
-  { sector: 'Communications', weight: 0.77 }
+  { name: 'Banking', weight: 48.54 },
+  { name: 'Supranational', weight: 20.28 },
+  { name: 'Consumer Cyclical', weight: 8.76 },
+  { name: 'Owned No Guarantee', weight: 5.81 },
+  { name: 'Insurance', weight: 4.88 },
+  { name: 'Other', weight: 3.57 },
+  { name: 'Consumer Non-Cyclical', weight: 3.01 },
+  { name: 'Capital Goods', weight: 2.56 },
+  { name: 'Technology', weight: 1.03 },
+  { name: 'Electric', weight: 0.79 },
+  { name: 'Communications', weight: 0.77 }
 ];
 
 export const FLOA_COUNTRY_ALLOCATIONS: CountryAllocation[] = [
-  {
-    "country": "United States",
-    "weight": 34.44
-  },
-  {
-    "country": "Supranational",
-    "weight": 20.23
-  },
-  {
-    "country": "Australia",
-    "weight": 7.97
-  },
-  {
-    "country": "Canada",
-    "weight": 6.53
-  },
-  {
-    "country": "United Kingdom",
-    "weight": 5.65
-  },
-  {
-    "country": "Japan",
-    "weight": 4.06
-  },
-  {
-    "country": "Korea (South)",
-    "weight": 3.54
-  },
-  {
-    "country": "Netherlands",
-    "weight": 3.0
-  },
-  {
-    "country": "Germany",
-    "weight": 2.53
-  },
-  {
-    "country": "Ireland",
-    "weight": 1.93
-  },
-  {
-    "country": "Sweden",
-    "weight": 1.86
-  },
-  {
-    "country": "France",
-    "weight": 1.76
-  },
-  {
-    "country": "Norway",
-    "weight": 1.58
-  },
-  {
-    "country": "Switzerland",
-    "weight": 1.14
-  },
-  {
-    "country": "Finland",
-    "weight": 1.07
-  },
-  {
-    "country": "Singapore",
-    "weight": 1.03
-  },
-  {
-    "country": "New Zealand",
-    "weight": 1.01
-  },
-  {
-    "country": "Spain",
-    "weight": 0.68
-  },
-  {
-    "country": "European Union",
-    "weight": 0.01
-  },
-  {
-    "country": "Mexico",
-    "weight": 0.0
-  }
+  { name: "United States", weight: 34.44 },
+  { name: "Supranational", weight: 20.23 },
+  { name: "Australia", weight: 7.97 },
+  { name: "Canada", weight: 6.53 },
+  { name: "United Kingdom", weight: 5.65 },
+  { name: "Japan", weight: 4.06 },
+  { name: "Korea (South)", weight: 3.54 },
+  { name: "Netherlands", weight: 3.0 },
+  { name: "Germany", weight: 2.53 },
+  { name: "Ireland", weight: 1.93 },
+  { name: "Sweden", weight: 1.86 },
+  { name: "France", weight: 1.76 },
+  { name: "Norway", weight: 1.58 },
+  { name: "Switzerland", weight: 1.14 },
+  { name: "Finland", weight: 1.07 },
+  { name: "Singapore", weight: 1.03 },
+  { name: "New Zealand", weight: 1.01 },
+  { name: "Spain", weight: 0.68 },
+  { name: "European Union", weight: 0.01 },
+  { name: "Mexico", weight: 0.0 }
 ];

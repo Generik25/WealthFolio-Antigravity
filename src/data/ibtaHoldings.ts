@@ -1,7 +1,7 @@
 // iShares $ Treasury Bond 1-3yr UCITS ETF (IBTA.L / CBU3.L / ISIN: IE00B3VWN179)
 // Full holdings list (~95 holdings) updated July 2026
 
-export interface ETFHolding {
+export interface RawBondHolding {
   name: string;
   ticker: string;
   weight: number;
@@ -11,17 +11,22 @@ export interface ETFHolding {
   currency?: string;
 }
 
+export interface ETFHolding extends RawBondHolding {
+  symbol: string;
+  location?: string;
+}
+
 export interface SectorAllocation {
-  sector: string;
+  name: string;
   weight: number;
 }
 
 export interface CountryAllocation {
-  country: string;
+  name: string;
   weight: number;
 }
 
-export const IBTA_FULL_HOLDINGS: ETFHolding[] = [
+const IBTA_RAW_HOLDINGS: RawBondHolding[] = [
   {
     "name": "TREASURY NOTE 3.5%",
     "ticker": "TNOTE",
@@ -879,26 +884,20 @@ export const IBTA_FULL_HOLDINGS: ETFHolding[] = [
   }
 ];
 
+export const IBTA_FULL_HOLDINGS: ETFHolding[] = IBTA_RAW_HOLDINGS.map(h => ({
+  ...h,
+  symbol: h.ticker,
+  location: h.country
+}));
+
 export const IBTA_SECTOR_ALLOCATIONS: SectorAllocation[] = [
-  { sector: 'Treasury', weight: 99.79 },
-  { sector: 'Cash and/or Derivatives', weight: 0.21 }
+  { name: 'Treasury', weight: 99.79 },
+  { name: 'Cash and/or Derivatives', weight: 0.21 }
 ];
 
 export const IBTA_COUNTRY_ALLOCATIONS: CountryAllocation[] = [
-  {
-    "country": "United States",
-    "weight": 99.84
-  },
-  {
-    "country": "Ireland",
-    "weight": 0.11
-  },
-  {
-    "country": "United Kingdom",
-    "weight": 0.02
-  },
-  {
-    "country": "European Union",
-    "weight": 0.0
-  }
+  { name: "United States", weight: 99.84 },
+  { name: "Ireland", weight: 0.11 },
+  { name: "United Kingdom", weight: 0.02 },
+  { name: "European Union", weight: 0.0 }
 ];

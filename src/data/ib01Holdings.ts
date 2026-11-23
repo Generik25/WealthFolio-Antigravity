@@ -1,7 +1,7 @@
 // iShares $ Treasury Bond 0-1yr UCITS ETF (IB01.L / ISIN: IE00BGSF1X88)
 // Full holdings list (~73 holdings) updated July 2026
 
-export interface ETFHolding {
+export interface RawBondHolding {
   name: string;
   ticker: string;
   weight: number;
@@ -11,17 +11,22 @@ export interface ETFHolding {
   currency?: string;
 }
 
+export interface ETFHolding extends RawBondHolding {
+  symbol: string;
+  location?: string;
+}
+
 export interface SectorAllocation {
-  sector: string;
+  name: string;
   weight: number;
 }
 
 export interface CountryAllocation {
-  country: string;
+  name: string;
   weight: number;
 }
 
-export const IB01_FULL_HOLDINGS: ETFHolding[] = [
+const IB01_RAW_HOLDINGS: RawBondHolding[] = [
   {
     "name": "BLK ICS USD LIQ AGENCY DIS",
     "ticker": "ICSUAGD",
@@ -681,30 +686,21 @@ export const IB01_FULL_HOLDINGS: ETFHolding[] = [
   }
 ];
 
+export const IB01_FULL_HOLDINGS: ETFHolding[] = IB01_RAW_HOLDINGS.map(h => ({
+  ...h,
+  symbol: h.ticker,
+  location: h.country
+}));
+
 export const IB01_SECTOR_ALLOCATIONS: SectorAllocation[] = [
-  { sector: 'Treasury', weight: 27.91 },
-  { sector: 'Cash and/or Derivatives', weight: 72.09 }
+  { name: 'Treasury', weight: 27.91 },
+  { name: 'Cash and/or Derivatives', weight: 72.09 }
 ];
 
 export const IB01_COUNTRY_ALLOCATIONS: CountryAllocation[] = [
-  {
-    "country": "United States",
-    "weight": 99.99
-  },
-  {
-    "country": "United Kingdom",
-    "weight": 0.03
-  },
-  {
-    "country": "Mexico",
-    "weight": 0.0
-  },
-  {
-    "country": "European Union",
-    "weight": 0.0
-  },
-  {
-    "country": "Japan",
-    "weight": 0.0
-  }
+  { name: "United States", weight: 99.99 },
+  { name: "United Kingdom", weight: 0.03 },
+  { name: "Mexico", weight: 0.0 },
+  { name: "European Union", weight: 0.0 },
+  { name: "Japan", weight: 0.0 }
 ];

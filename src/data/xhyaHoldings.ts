@@ -18,7 +18,7 @@ const computeSectorAllocations = (holdings: ETFHolding[]) => {
     totals[s] = (totals[s] || 0) + h.weight;
   });
   return Object.entries(totals)
-    .map(([sector, weight]) => ({ sector, weight: parseFloat(weight.toFixed(2)) }))
+    .map(([name, weight]) => ({ name, weight: parseFloat(weight.toFixed(2)) }))
     .sort((a, b) => b.weight - a.weight);
 };
 
@@ -30,7 +30,7 @@ const computeCountryAllocations = (holdings: ETFHolding[]) => {
     totals[c] = (totals[c] || 0) + h.weight;
   });
   return Object.entries(totals)
-    .map(([country, weight]) => ({ country, weight: parseFloat(weight.toFixed(2)) }))
+    .map(([name, weight]) => ({ name, weight: parseFloat(weight.toFixed(2)) }))
     .sort((a, b) => b.weight - a.weight);
 };
 

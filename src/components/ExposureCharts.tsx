@@ -109,7 +109,19 @@ const ASSET_MAPPING: Record<string, { region: string; sector: string }> = {
   'VWCG.DE': { region: 'Europe', sector: 'Diversified Equities' },
   'VBTC': { region: 'Decentralized', sector: 'Crypto Assets' },
   'VETH': { region: 'Decentralized', sector: 'Crypto Assets' },
-  'CRWV': { region: 'Global Market', sector: 'Diversified Equities' },
+  'CRWV': { region: 'US', sector: 'Information Technology' },
+  'CRDO': { region: 'US', sector: 'Information Technology' },
+  'MTDR': { region: 'US', sector: 'Energy' },
+  'VRT': { region: 'US', sector: 'Industrials' },
+  'LLY': { region: 'US', sector: 'Healthcare' },
+  'STRL': { region: 'US', sector: 'Industrials' },
+  'CLS': { region: 'North America', sector: 'Information Technology' },
+  'PANW': { region: 'US', sector: 'Information Technology' },
+  'MA': { region: 'US', sector: 'Financial Services' },
+  'V': { region: 'US', sector: 'Financial Services' },
+  'CVX': { region: 'US', sector: 'Energy' },
+  'CRM': { region: 'US', sector: 'Information Technology' },
+  'EQIX': { region: 'US', sector: 'Real Estate' },
 };
 
 // Standardized Continent Mapping
@@ -118,12 +130,29 @@ export const normalizeContinent = (regionOrCountry: string): string => {
   const r = regionOrCountry.trim();
   const lower = r.toLowerCase();
 
+  // Physical Gold / Commodity vaults are global commodities, not UK country exposure
+  if (lower.includes('gold vault') || lower.includes('bullion') || lower.includes('physical gold')) {
+    return 'Diversificat / Global';
+  }
+
+  if (lower.includes('decentralized') || lower.includes('crypto')) {
+    return 'Crypto / Decentralizat';
+  }
+
+  if (
+    lower.includes('local liquidity') ||
+    lower.includes('cash') ||
+    lower.includes('lichidit')
+  ) {
+    return 'Lichidități';
+  }
+
   if (
     lower.includes('romania') ||
     lower.includes('germany') ||
     lower.includes('france') ||
     lower.includes('united kingdom') ||
-    lower.includes('uk') ||
+    /\buk\b/.test(lower) ||
     lower.includes('netherlands') ||
     lower.includes('switzerland') ||
     lower.includes('italy') ||
@@ -141,6 +170,22 @@ export const normalizeContinent = (regionOrCountry: string): string => {
     lower.includes('portugal') ||
     lower.includes('hungary') ||
     lower.includes('luxembourg') ||
+    lower.includes('cyprus') ||
+    lower.includes('iceland') ||
+    lower.includes('slovakia') ||
+    lower.includes('slovenia') ||
+    lower.includes('croatia') ||
+    lower.includes('bulgaria') ||
+    lower.includes('malta') ||
+    lower.includes('estonia') ||
+    lower.includes('latvia') ||
+    lower.includes('lithuania') ||
+    lower.includes('jersey') ||
+    lower.includes('guernsey') ||
+    lower.includes('liechtenstein') ||
+    lower.includes('european union') ||
+    lower.includes('eurozone') ||
+    lower.includes('russia') ||
     lower === 'europe'
   ) {
     return 'Europa';
@@ -148,8 +193,9 @@ export const normalizeContinent = (regionOrCountry: string): string => {
 
   if (
     lower.includes('united states') ||
-    lower.includes('us') ||
-    lower.includes('usa') ||
+    /\bus\b/.test(lower) ||
+    /\busa\b/.test(lower) ||
+    lower.includes('u.s.') ||
     lower.includes('canada') ||
     lower.includes('mexico') ||
     lower.includes('north america')
@@ -167,6 +213,7 @@ export const normalizeContinent = (regionOrCountry: string): string => {
     lower.includes('singapore') ||
     lower.includes('hong kong') ||
     lower.includes('australia') ||
+    lower.includes('new zealand') ||
     lower.includes('indonesia') ||
     lower.includes('thailand') ||
     lower.includes('malaysia') ||
@@ -183,6 +230,7 @@ export const normalizeContinent = (regionOrCountry: string): string => {
     lower.includes('argentina') ||
     lower.includes('chile') ||
     lower.includes('colombia') ||
+    lower.includes('peru') ||
     lower.includes('south america') ||
     lower.includes('latin america')
   ) {
@@ -193,25 +241,19 @@ export const normalizeContinent = (regionOrCountry: string): string => {
     lower.includes('south africa') ||
     lower.includes('israel') ||
     lower.includes('saudi') ||
-    lower.includes('uae') ||
+    lower.includes('united arab emirates') ||
+    /\buae\b/.test(lower) ||
     lower.includes('qatar') ||
+    lower.includes('kuwait') ||
+    lower.includes('turkey') ||
+    lower.includes('türkiye') ||
+    lower.includes('oman') ||
+    lower.includes('bahrain') ||
     lower.includes('egypt') ||
     lower.includes('africa') ||
     lower.includes('middle east')
   ) {
     return 'Africa & Orientul Mijlociu';
-  }
-
-  if (lower.includes('decentralized') || lower.includes('crypto')) {
-    return 'Crypto / Decentralizat';
-  }
-
-  if (
-    lower.includes('local liquidity') ||
-    lower.includes('cash') ||
-    lower.includes('lichidit')
-  ) {
-    return 'Lichidități';
   }
 
   return 'Diversificat / Global';
@@ -258,7 +300,7 @@ export const normalizeSector = (sector: string): string => {
     lower.includes('technology') ||
     lower.includes('semis') ||
     lower.includes('semiconductor') ||
-    lower.includes('ai') ||
+    /\bai\b/.test(lower) ||
     lower.includes('quantum') ||
     lower.includes('cloud') ||
     lower.includes('nextgen') ||
@@ -345,6 +387,9 @@ export const normalizeSector = (sector: string): string => {
     lower.includes('bond') ||
     lower.includes('treasury') ||
     lower.includes('t-bill') ||
+    lower.includes('sovereign') ||
+    lower.includes('government') ||
+    lower.includes('supranational') ||
     lower.includes('titluri de stat')
   ) {
     return 'Bonds & Fixed Income';
@@ -423,7 +468,12 @@ export const ExposureCharts: React.FC<ExposureChartsProps> = React.memo(({ asset
             (savedEtf.holdings.some((h: any) => h.symbol === 'AAPL' && h.weight === 10) ||
              (savedEtf.holdings.length === 2 && savedEtf.holdings[0]?.symbol === 'AAPL'));
           const isIncomplete = savedEtf && savedEtf.holdings && defaultEtf.holdings && (savedEtf.holdings.length < defaultEtf.holdings.length);
-          if (!savedEtf || hasDummy || isIncomplete || (defaultEtf.lastUpdated && (!savedEtf.lastUpdated || defaultEtf.lastUpdated >= savedEtf.lastUpdated))) {
+          const hasLegacySchema = savedEtf && (
+            (savedEtf.sectors && savedEtf.sectors.some((s: any) => !s.name)) ||
+            (savedEtf.countries && savedEtf.countries.some((c: any) => !c.name)) ||
+            (savedEtf.holdings && savedEtf.holdings.some((h: any) => !h.symbol))
+          );
+          if (!savedEtf || hasDummy || isIncomplete || hasLegacySchema || (defaultEtf.lastUpdated && (!savedEtf.lastUpdated || defaultEtf.lastUpdated >= savedEtf.lastUpdated))) {
             activeEtfDb[k] = defaultEtf;
           }
         });
@@ -446,26 +496,48 @@ export const ExposureCharts: React.FC<ExposureChartsProps> = React.memo(({ asset
 
        const etfData: ETFCoverageData | undefined = matchKey ? activeEtfDb[matchKey] : undefined;
 
-       // Sector calculation
-       if (etfData && etfData.sectors && etfData.sectors.length > 0) {
-         etfData.sectors.forEach(sec => {
-           const normSec = normalizeSector(sec.name);
-           const secValue = (value * sec.weight) / 100;
-           sMap[normSec] = (sMap[normSec] || 0) + secValue;
-         });
+       // Sector calculation: keep BOND assets strictly in Bonds & Fixed Income (never mix bond issuers into equity sectors)
+       if (asset.type === AssetType.BOND) {
+         sMap['Bonds & Fixed Income'] = (sMap['Bonds & Fixed Income'] || 0) + value;
+       } else if (etfData && etfData.sectors && etfData.sectors.length > 0) {
+         const validSectors = etfData.sectors
+           .map((sec: any) => ({ name: sec.name ?? sec.sector ?? '', weight: Number(sec.weight) || 0 }))
+           .filter(sec => sec.weight > 0);
+         const totalSecWeight = validSectors.reduce((sum, sec) => sum + sec.weight, 0);
+         if (totalSecWeight > 0) {
+           validSectors.forEach(sec => {
+             const normSec = normalizeSector(sec.name);
+             const secValue = (value * sec.weight) / totalSecWeight;
+             sMap[normSec] = (sMap[normSec] || 0) + secValue;
+           });
+         } else {
+           const info = getAssetInfo(asset);
+           const normSec = normalizeSector(info.sector);
+           sMap[normSec] = (sMap[normSec] || 0) + value;
+         }
        } else {
          const info = getAssetInfo(asset);
          const normSec = normalizeSector(info.sector);
          sMap[normSec] = (sMap[normSec] || 0) + value;
        }
 
-       // Region calculation
+       // Region calculation: use normalized positive weights so each ETF totals exact 100% of its value
        if (etfData && etfData.countries && etfData.countries.length > 0) {
-         etfData.countries.forEach(cntry => {
-           const normRegion = normalizeContinent(cntry.name);
-           const cntryValue = (value * cntry.weight) / 100;
-           rMap[normRegion] = (rMap[normRegion] || 0) + cntryValue;
-         });
+         const validCountries = etfData.countries
+           .map((cntry: any) => ({ name: cntry.name ?? cntry.country ?? '', weight: Number(cntry.weight) || 0 }))
+           .filter(cntry => cntry.weight > 0);
+         const totalCntryWeight = validCountries.reduce((sum, cntry) => sum + cntry.weight, 0);
+         if (totalCntryWeight > 0) {
+           validCountries.forEach(cntry => {
+             const normRegion = normalizeContinent(cntry.name);
+             const cntryValue = (value * cntry.weight) / totalCntryWeight;
+             rMap[normRegion] = (rMap[normRegion] || 0) + cntryValue;
+           });
+         } else {
+           const info = getAssetInfo(asset);
+           const normRegion = normalizeContinent(info.region);
+           rMap[normRegion] = (rMap[normRegion] || 0) + value;
+         }
        } else {
          const info = getAssetInfo(asset);
          const normRegion = normalizeContinent(info.region);
