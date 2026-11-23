@@ -1932,6 +1932,8 @@ const App: React.FC = () => {
             />
             <PortfolioPeriodicReturns
               dailyHistory={portfolioHistory.daily}
+              currency={reportingCurrency}
+              convertValue={convertValue}
             />
             <MonthlyPLChart
               dailyHistory={portfolioHistory.daily}
