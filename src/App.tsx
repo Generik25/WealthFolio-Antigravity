@@ -293,6 +293,24 @@ const App: React.FC = () => {
   const [showSettings, setShowSettings] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [showAddPortfolio, setShowAddPortfolio] = useState(false);
+  const [showAddPlannedAsset, setShowAddPlannedAsset] = useState(false);
+  const [newPlannedAsset, setNewPlannedAsset] = useState<{
+    portfolioId: string;
+    symbol: string;
+    isin: string;
+    name: string;
+    type: AssetType;
+    currency: string;
+    targetAllocation: number;
+  }>({
+    portfolioId: '',
+    symbol: '',
+    isin: '',
+    name: '',
+    type: AssetType.ETF,
+    currency: 'EUR',
+    targetAllocation: 3
+  });
   const [newPortfolioData, setNewPortfolioData] = useState({
     name: '',
     description: '',
@@ -562,7 +580,14 @@ const App: React.FC = () => {
   }, [activeAssets]);
   
   const closedAssets = useMemo(() => {
-     const standardClosed = activeAssets.filter(a => (Number(a.quantity) || 0) < 0.001);
+     const standardClosed = activeAssets.filter(a => {
+       if ((Number(a.quantity) || 0) >= 0.001) return false;
+       const symUpper = (a.symbol || '').toUpperCase().trim();
+       const hasTx = activeTransactions.some(t => (t.symbol || '').toUpperCase().trim() === symUpper);
+       const hasRealized = Math.abs(Number(a.realizedPL) || 0) > 0.001;
+       // Exclude planned/watchlist assets (0 qty, 0 transactions, 0 realized P/L) from Closed Positions history
+       return hasTx || hasRealized;
+     });
      const brokerInterestTxs = activeTransactions.filter(t => t.type === TransactionType.INTEREST && !t.symbol);
      
      if (brokerInterestTxs.length > 0) {
@@ -952,7 +977,8 @@ const App: React.FC = () => {
        };
 
        if (txData.symbol) {
-          let assetIndex = p.assets.findIndex(a => a.symbol === txData.symbol);
+          const txSymUpper = txData.symbol.trim().toUpperCase();
+          let assetIndex = p.assets.findIndex(a => (a.symbol || '').trim().toUpperCase() === txSymUpper);
           
           if (assetIndex === -1 && newAssetDetails) {
              const newAsset: Asset = {
@@ -1272,6 +1298,68 @@ const App: React.FC = () => {
 
       return { ...p, assets: updatedAssets };
     }));
+  };
+
+  const handleOpenAddPlannedAsset = () => {
+    const defaultPortfolio = activePortfolioId === 'all' ? (portfolios[0] || null) : (activePortfolios[0] || null);
+    setNewPlannedAsset({
+      portfolioId: defaultPortfolio?.id || 'p1',
+      symbol: '',
+      isin: '',
+      name: '',
+      type: AssetType.ETF,
+      currency: defaultPortfolio?.currency || reportingCurrency || 'EUR',
+      targetAllocation: 3
+    });
+    setShowAddPlannedAsset(true);
+  };
+
+  const handleAddPlannedAsset = (e: React.FormEvent) => {
+    e.preventDefault();
+    const cleanSymbol = newPlannedAsset.symbol.trim().toUpperCase();
+    if (!cleanSymbol) return;
+    const cleanIsin = newPlannedAsset.isin.trim().toUpperCase();
+    const cleanName = newPlannedAsset.name.trim() || cleanSymbol;
+    const cleanTarget = Math.max(0, Math.min(100, Math.round((Number(newPlannedAsset.targetAllocation) || 0) * 10) / 10));
+    const targetPortfolioId = newPlannedAsset.portfolioId || (activePortfolioId !== 'all' ? activePortfolioId : portfolios[0]?.id);
+
+    setPortfolios(prev => prev.map(p => {
+      if (p.id !== targetPortfolioId) return p;
+      const existingIdx = p.assets.findIndex(a => (a.symbol || '').trim().toUpperCase() === cleanSymbol);
+      if (existingIdx >= 0) {
+        const updatedAssets = [...p.assets];
+        updatedAssets[existingIdx] = {
+          ...updatedAssets[existingIdx],
+          targetAllocation: cleanTarget,
+          ...(cleanIsin ? { isin: cleanIsin } : {})
+        };
+        return { ...p, assets: updatedAssets };
+      }
+      const plannedAsset: Asset = {
+        id: generateId(),
+        symbol: cleanSymbol,
+        name: cleanName,
+        type: newPlannedAsset.type,
+        quantity: 0,
+        buyPrice: 0,
+        currentPrice: 0,
+        previousClose: 0,
+        currency: newPlannedAsset.currency || p.currency || 'EUR',
+        realizedPL: 0,
+        targetAllocation: cleanTarget,
+        ...(cleanIsin ? { isin: cleanIsin } : {})
+      };
+      return { ...p, assets: [...p.assets, plannedAsset] };
+    }));
+
+    setShowAddPlannedAsset(false);
+  };
+
+  const handleRemovePlannedAsset = (assetId: string) => {
+    setPortfolios(prev => prev.map(p => ({
+      ...p,
+      assets: p.assets.filter(a => a.id !== assetId)
+    })));
   };
 
   const handleAddPortfolio = (e: React.FormEvent) => {
@@ -2252,8 +2340,22 @@ const App: React.FC = () => {
 
                 {/* Planificare & Rebalansare */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mt-8">
-                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900"><h3 className="text-lg font-bold text-white flex items-center gap-2"><Target className="text-emerald-400" size={20} /> Planificare & Rebalansare</h3><div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${Math.abs(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0) - 100) < 0.05 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{Number(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0).toFixed(1))}%</span></div></div>
-                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white">{asset.symbol}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span></div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
+                    <div className="p-6 border-b border-slate-800 flex flex-wrap gap-3 justify-between items-center bg-slate-900">
+                      <h3 className="text-lg font-bold text-white flex items-center gap-2"><Target className="text-emerald-400" size={20} /> Planificare & Rebalansare</h3>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={handleOpenAddPlannedAsset}
+                          className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm hover:border-emerald-500/50 cursor-pointer"
+                          title="Adaugă un activ nou pe care plănuiești să îl cumperi în viitor (se corelează automat cu Ținte Tactice și Calculatorul DCA)"
+                        >
+                          <PlusCircle size={14} />
+                          <span>Activ Planificat</span>
+                        </button>
+                        <div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${Math.abs(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0) - 100) < 0.05 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{Number(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0).toFixed(1))}%</span></div>
+                      </div>
+                    </div>
+                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const isPlannedOnly = qty <= 0.000001 && !activeTransactions.some(t => (t.symbol || '').trim().toUpperCase() === (asset.symbol || '').trim().toUpperCase()); const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white flex items-center gap-1.5">{asset.symbol}{isPlannedOnly && (<span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded font-medium">Planificat</span>)}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span>{isPlannedOnly && (<button type="button" onClick={() => handleRemovePlannedAsset(asset.id)} className="p-1 text-slate-500 hover:text-rose-400 transition-colors" title="Elimină activul planificat"><Trash2 size={14} /></button>)}</div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>
@@ -2275,6 +2377,119 @@ const App: React.FC = () => {
         />
       )}
       {showAddPortfolio && (<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"><div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md p-6"><h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><FolderPlus size={20} className="text-emerald-400" /> Adaugă Portofoliu Nou</h3><form onSubmit={handleAddPortfolio} className="space-y-4"><div><label className="block text-sm font-medium text-slate-400 mb-1">Nume Portofoliu</label><input required type="text" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500" placeholder="ex: P4 - Experimente" value={newPortfolioData.name} onChange={e => setNewPortfolioData({...newPortfolioData, name: e.target.value})} /></div><div><label className="block text-sm font-medium text-slate-400 mb-1">Descriere</label><textarea className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500 h-20 resize-none" placeholder="Scurtă descriere a strategiei..." value={newPortfolioData.description} onChange={e => setNewPortfolioData({...newPortfolioData, description: e.target.value})} /></div><div className="grid grid-cols-2 gap-4"><div><label className="block text-sm font-medium text-slate-400 mb-1">Valută Raportare</label><select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={newPortfolioData.currency} onChange={e => setNewPortfolioData({...newPortfolioData, currency: e.target.value})}><option value="EUR">EUR</option><option value="USD">USD</option><option value="RON">RON</option></select></div><div><label className="block text-sm font-medium text-slate-400 mb-1">Culoare Etichethetă</label><select className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={newPortfolioData.color} onChange={e => setNewPortfolioData({...newPortfolioData, color: e.target.value})}><option value="bg-slate-500">Gri (Neutru)</option><option value="bg-emerald-500">Verde (Growth)</option><option value="bg-blue-500">Albastru (Actiuni)</option><option value="bg-purple-500">Violet (Crypto/Agresiv)</option><option value="bg-rose-500">Roșu (High Risk)</option><option value="bg-amber-500">Galben (Gold)</option></select></div></div><div className="flex justify-end gap-3 mt-6"><button type="button" onClick={() => setShowAddPortfolio(false)} className="text-slate-400 hover:text-white px-3 py-2">Anulează</button><button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium">Creează</button></div></form></div></div>)}
+      {showAddPlannedAsset && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md p-6 shadow-2xl">
+            <h3 className="text-xl font-bold text-white mb-1 flex items-center gap-2">
+              <Target size={20} className="text-emerald-400" /> Adaugă Activ Planificat (DCA)
+            </h3>
+            <p className="text-xs text-slate-400 mb-4">
+              Activul intră imediat în Planificare, Ținte Tactice și Calculatorul DCA (cu 0 unități). Când vei face prima achiziție cu același simbol, trece automat în Dețineri Actuale păstrând ținta setată.
+            </p>
+            <form onSubmit={handleAddPlannedAsset} className="space-y-4">
+              {activePortfolioId === 'all' && portfolios.length > 1 && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Portofoliu</label>
+                  <select
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={newPlannedAsset.portfolioId}
+                    onChange={e => {
+                      const selP = portfolios.find(p => p.id === e.target.value);
+                      setNewPlannedAsset({ ...newPlannedAsset, portfolioId: e.target.value, currency: selP?.currency || newPlannedAsset.currency });
+                    }}
+                  >
+                    {portfolios.map(p => (
+                      <option key={p.id} value={p.id}>{p.name} ({p.currency})</option>
+                    ))}
+                  </select>
+                </div>
+              )}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Simbol (Ticker)</label>
+                  <input
+                    required
+                    type="text"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white uppercase font-mono outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="ex: WNRG.DE"
+                    value={newPlannedAsset.symbol}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, symbol: e.target.value.toUpperCase() })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">ISIN (opțional)</label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white uppercase font-mono outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="ex: IE00BYTRR863"
+                    value={newPlannedAsset.isin}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, isin: e.target.value.toUpperCase() })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="col-span-2">
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Nume Activ (opțional)</label>
+                  <input
+                    type="text"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    placeholder="ex: SPDR MSCI World Energy UCITS ETF"
+                    value={newPlannedAsset.name}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, name: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Țintă (%)</label>
+                  <input
+                    required
+                    type="number"
+                    min="0.1"
+                    max="100"
+                    step="0.1"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono text-right outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={newPlannedAsset.targetAllocation}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, targetAllocation: parseFloat(e.target.value) || 0 })}
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Clasă Activ</label>
+                  <select
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={newPlannedAsset.type}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, type: e.target.value as AssetType })}
+                  >
+                    <option value={AssetType.ETF}>{AssetType.ETF}</option>
+                    <option value={AssetType.STOCK}>{AssetType.STOCK}</option>
+                    <option value={AssetType.BOND}>{AssetType.BOND}</option>
+                    <option value={AssetType.COMMODITY}>{AssetType.COMMODITY}</option>
+                    <option value={AssetType.CRYPTO}>{AssetType.CRYPTO}</option>
+                    <option value={AssetType.BANK_DEPOSIT}>{AssetType.BANK_DEPOSIT}</option>
+                    <option value={AssetType.REAL_ESTATE}>{AssetType.REAL_ESTATE}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Valută Activ</label>
+                  <select
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={newPlannedAsset.currency}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, currency: e.target.value })}
+                  >
+                    <option value="EUR">EUR</option>
+                    <option value="USD">USD</option>
+                    <option value="RON">RON</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end gap-3 mt-6">
+                <button type="button" onClick={() => setShowAddPlannedAsset(false)} className="text-slate-400 hover:text-white px-3 py-2">Anulează</button>
+                <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium">Adaugă în Plan</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
       {showRateEditor && (<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"><div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-sm p-6 shadow-2xl"><h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Edit3 size={20} className="text-blue-400" /> Editează Curs Valutar</h3><form onSubmit={handleUpdateRates} className="space-y-4"><div><label className="block text-sm font-medium text-slate-400 mb-1">EUR / RON</label><input type="number" step="0.0001" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none" value={liveRates.eur} onChange={e => setLiveRates({...liveRates, eur: parseFloat(e.target.value) || 0})} /></div><div><label className="block text-sm font-medium text-slate-400 mb-1">USD / RON</label><input type="number" step="0.0001" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none" value={liveRates.usd} onChange={e => setLiveRates({...liveRates, usd: parseFloat(e.target.value) || 0})} /></div><div><label className="block text-sm font-medium text-slate-400 mb-1">EUR / USD</label><input type="number" step="0.0001" className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none" value={liveRates.eurUsd} onChange={e => setLiveRates({...liveRates, eurUsd: parseFloat(e.target.value) || 0})} /></div><div className="flex justify-end gap-3 mt-6"><button type="button" onClick={() => setShowRateEditor(false)} className="text-slate-400 px-3 py-2">Închide</button><button type="submit" className="bg-blue-600 text-white px-4 py-2 rounded-lg font-medium">Actualizează</button></div></form></div></div>)}
       {showSettings && (<div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"><div className="bg-slate-900 border border-slate-700 rounded-xl w-full max-w-md p-6"><h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><Settings size={20} /> Setări & Backup</h3><div className="space-y-6"><div className="bg-slate-800/50 p-4 rounded-lg border border-slate-700"><h4 className="text-sm font-bold text-emerald-400 mb-3 uppercase tracking-wider">Rapoarte & Export</h4><div className="grid grid-cols-2 gap-3"><button onClick={generateCSV} className="flex flex-col items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg transition-colors group"><FileSpreadsheet size={24} className="text-emerald-500 group-hover:scale-110 transition-transform" /><span className="text-xs font-medium text-slate-300">Excel (.csv)</span></button><button onClick={handlePrintReport} className="flex flex-col items-center justify-center gap-2 p-3 bg-slate-800 hover:bg-slate-700 border border-slate-600 rounded-lg transition-colors group"><Printer size={24} className="text-blue-500 group-hover:scale-110 transition-transform" /><span className="text-xs font-medium text-slate-300">Print / PDF</span></button></div></div><div className="bg-slate-800 p-4 rounded-lg"><h4 className="text-sm font-bold text-slate-400 mb-3 uppercase tracking-wider">Backup Date</h4><div className="flex gap-3"><button onClick={handleExportData} className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2"><Download size={16} /> Export JSON</button><label className="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-2 rounded-lg text-sm font-medium flex items-center justify-center gap-2 cursor-pointer"><Upload size={16} /> Import JSON<input type="file" accept=".json" className="hidden" ref={fileInputRef} onChange={handleImportData} /></label></div></div><div className="bg-rose-900/10 border border-rose-900/30 p-4 rounded-lg"><h4 className="text-rose-400 font-bold text-sm mb-2 uppercase tracking-wider">Zona Periculoasă</h4><p className="text-xs text-rose-300/60 mb-3">Această acțiune este ireversibilă. Va șterge toate datele.</p><button onClick={handleHardReset} className="w-full bg-rose-900/40 hover:bg-rose-900/60 border border-rose-700 text-rose-200 py-2 rounded-lg text-sm font-medium transition-colors">Resetează la Zero</button></div></div><div className="mt-6 flex justify-end"><button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-white px-4 py-2">Închide</button></div></div></div>)}
       {assetDeleteConfirm.isOpen && assetDeleteConfirm.asset && (() => {
