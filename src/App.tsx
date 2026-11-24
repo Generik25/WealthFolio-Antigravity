@@ -1206,7 +1206,72 @@ const App: React.FC = () => {
   };
 
   const handleUpdateTargetAllocation = (assetId: string, newTarget: number) => {
-    setPortfolios(prev => prev.map(p => ({ ...p, assets: p.assets.map(a => a.id === assetId ? { ...a, targetAllocation: newTarget } : a) })));
+    const sanitized = Math.max(0, Math.min(100, Math.round((Number(newTarget) || 0) * 10) / 10));
+    setPortfolios(prev => prev.map(p => ({ ...p, assets: p.assets.map(a => a.id === assetId ? { ...a, targetAllocation: sanitized } : a) })));
+  };
+
+  // Bidirectional Macro -> Micro sync: scales all active/targeted assets of `assetType` proportionally so their sum equals `newClassTarget` exactly (to 0.1%)
+  const handleUpdateClassTarget = (assetType: AssetType, newClassTarget: number) => {
+    const targetTotal = Math.max(0, Math.min(100, Math.round((Number(newClassTarget) || 0) * 10) / 10));
+    const targetPortfolioIds = new Set(activePortfolios.map(p => p.id));
+
+    setPortfolios(prev => prev.map(p => {
+      if (!targetPortfolioIds.has(p.id)) return p;
+
+      const eligibleIndices: number[] = [];
+      p.assets.forEach((a, idx) => {
+        if (a.type === assetType && ((Number(a.quantity) || 0) > 0.000001 || (Number(a.targetAllocation) || 0) > 0)) {
+          eligibleIndices.push(idx);
+        }
+      });
+
+      if (eligibleIndices.length === 0) return p;
+
+      const updatedAssets = [...p.assets];
+
+      if (targetTotal <= 0) {
+        eligibleIndices.forEach(idx => {
+          updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: 0 };
+        });
+        return { ...p, assets: updatedAssets };
+      }
+
+      // Compute proportional weights: prefer existing targetAllocation, fall back to current market value, then equal split
+      const currentTargetSum = eligibleIndices.reduce((s, idx) => s + (Number(p.assets[idx].targetAllocation) || 0), 0);
+      let weights: number[];
+      if (currentTargetSum > 0.001) {
+        weights = eligibleIndices.map(idx => (Number(p.assets[idx].targetAllocation) || 0) / currentTargetSum);
+      } else {
+        const marketVals = eligibleIndices.map(idx => {
+          const a = p.assets[idx];
+          return Math.max(0, convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency));
+        });
+        const mvSum = marketVals.reduce((s, v) => s + v, 0);
+        if (mvSum > 0.001) {
+          weights = marketVals.map(v => v / mvSum);
+        } else {
+          weights = eligibleIndices.map(() => 1 / eligibleIndices.length);
+        }
+      }
+
+      // Largest-remainder rounding in tenths (0.1%) so scaled micro targets sum EXACTLY to targetTotal
+      const totalTenths = Math.round(targetTotal * 10);
+      const rawTenths = weights.map(w => w * totalTenths);
+      const floorTenths = rawTenths.map(v => Math.floor(v));
+      let remainder = totalTenths - floorTenths.reduce((s, v) => s + v, 0);
+      const order = rawTenths
+        .map((v, i) => ({ i, frac: v - floorTenths[i] }))
+        .sort((a, b) => b.frac - a.frac);
+      for (let k = 0; k < remainder && k < order.length; k++) {
+        floorTenths[order[k].i] += 1;
+      }
+
+      eligibleIndices.forEach((idx, i) => {
+        updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: floorTenths[i] / 10 };
+      });
+
+      return { ...p, assets: updatedAssets };
+    }));
   };
 
   const handleAddPortfolio = (e: React.FormEvent) => {
@@ -2171,10 +2236,13 @@ const App: React.FC = () => {
                   <AssetClassTargetAllocation
                     key={activePortfolioId}
                     activePortfolioId={activePortfolioId}
+                    portfolios={activePortfolios}
                     assets={activeAssets}
                     reportingCurrency={reportingCurrency}
                     convertValue={convertValue}
                     netWorth={macroStats.netWorth}
+                    cashBalance={macroStats.cashBalance}
+                    onUpdateClassTarget={handleUpdateClassTarget}
                     onAskAI={(prompt) => {
                       setAiExternalPrompt(prompt);
                       aiAdvisorRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -2184,8 +2252,8 @@ const App: React.FC = () => {
 
                 {/* Planificare & Rebalansare */}
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mt-8">
-                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900"><h3 className="text-lg font-bold text-white flex items-center gap-2"><Target className="text-emerald-400" size={20} /> Planificare & Rebalansare</h3><div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${activeAssets.reduce((s,a)=>s+(a.targetAllocation||0),0) === 100 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{activeAssets.reduce((s,a)=>s+(a.targetAllocation||0),0)}%</span></div></div>
-                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = asset.targetAllocation || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white">{asset.symbol}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span></div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
+                    <div className="p-6 border-b border-slate-800 flex justify-between items-center bg-slate-900"><h3 className="text-lg font-bold text-white flex items-center gap-2"><Target className="text-emerald-400" size={20} /> Planificare & Rebalansare</h3><div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${Math.abs(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0) - 100) < 0.05 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{Number(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0).toFixed(1))}%</span></div></div>
+                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white">{asset.symbol}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span></div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>

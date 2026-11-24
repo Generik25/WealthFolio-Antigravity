@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Asset, AssetType, getAssetCategoryGroup } from '../types';
+import { Asset, AssetType, Portfolio, getAssetCategoryGroup } from '../types';
 import { Target, Info, AlertTriangle, Sparkles, Sliders, CheckCircle2, ChevronRight, Coins, ArrowUpRight, TrendingUp } from 'lucide-react';
 
 interface AssetClassTargetAllocationProps {
   assets: Asset[];
+  portfolios?: Portfolio[];
   reportingCurrency: string;
   convertValue: (amount: number, from: string, to: string) => number;
   netWorth: number;
+  cashBalance?: number;
+  onUpdateClassTarget?: (assetType: AssetType, newClassTarget: number) => void;
   onAskAI: (prompt: string) => void;
   activePortfolioId: string;
 }
+
+const ZERO_TARGETS: Record<AssetType, number> = {
+  [AssetType.ETF]: 0,
+  [AssetType.STOCK]: 0,
+  [AssetType.CASH]: 0,
+  [AssetType.BOND]: 0,
+  [AssetType.CRYPTO]: 0,
+  [AssetType.BANK_DEPOSIT]: 0,
+  [AssetType.REAL_ESTATE]: 0,
+  [AssetType.COMMODITY]: 0,
+};
 
 const DEFAULT_TARGETS: Record<AssetType, number> = {
   [AssetType.ETF]: 50,
@@ -22,21 +36,26 @@ const DEFAULT_TARGETS: Record<AssetType, number> = {
   [AssetType.COMMODITY]: 0,
 };
 
+const round1 = (n: number): number => Math.round(n * 10) / 10;
+
 export const AssetClassTargetAllocation: React.FC<AssetClassTargetAllocationProps> = ({
   assets,
+  portfolios = [],
   reportingCurrency,
   convertValue,
   netWorth,
+  cashBalance = 0,
+  onUpdateClassTarget,
   onAskAI,
   activePortfolioId,
 }) => {
-  // Load target allocations from local storage
-  const [targets, setTargets] = useState<Record<AssetType, number>>(() => {
+  // Local targets used for Cash and classes with no assets yet
+  const [localTargets, setLocalTargets] = useState<Record<AssetType, number>>(() => {
     try {
       const saved = localStorage.getItem(`investai_asset_class_targets_${activePortfolioId}`)
         || (activePortfolioId === 'all' ? localStorage.getItem('investai_asset_class_targets') : null);
       if (saved) {
-        return JSON.parse(saved);
+        return { ...ZERO_TARGETS, ...JSON.parse(saved) };
       }
     } catch (e) {
       console.error("Failed to load asset class targets", e);
@@ -44,7 +63,92 @@ export const AssetClassTargetAllocation: React.FC<AssetClassTargetAllocationProp
     return DEFAULT_TARGETS;
   });
 
-  // Persist target allocations
+  // Portfolio weight map (1.0 for single portfolio; proportional share of total assets on 'all' so consolidated targets sum to 100%)
+  const assetPortfolioWeightMap = useMemo(() => {
+    const map = new Map<string, number>();
+    if (activePortfolioId !== 'all' || portfolios.length <= 1) {
+      assets.forEach(a => map.set(a.id, 1));
+      return map;
+    }
+
+    const pVals = portfolios.map(p => {
+      const val = (p.assets || []).reduce((s, a) => {
+        const qty = Number(a.quantity) || 0;
+        const price = Number(a.currentPrice) || 0;
+        return s + (qty > 0.000001 ? convertValue(qty * price, a.currency, reportingCurrency) : 0);
+      }, 0);
+      return { p, val };
+    });
+    const totalVal = pVals.reduce((s, x) => s + x.val, 0);
+    pVals.forEach(({ p, val }) => {
+      const w = totalVal > 0 ? val / totalVal : (1 / portfolios.length);
+      (p.assets || []).forEach(a => map.set(a.id, w));
+    });
+    return map;
+  }, [activePortfolioId, portfolios, assets, convertValue, reportingCurrency]);
+
+  // Identify which non-Cash classes have open or targeted assets in the active scope
+  const { microDerivedByClass, classesWithAssets, hasAnyMicroTargets } = useMemo(() => {
+    const sums: Record<AssetType, number> = { ...ZERO_TARGETS };
+    const present = new Set<AssetType>();
+    let totalMicro = 0;
+
+    assets.forEach(a => {
+      const qty = Number(a.quantity) || 0;
+      const t = Number(a.targetAllocation) || 0;
+      if (qty > 0.000001 || t > 0) {
+        present.add(a.type);
+        const w = assetPortfolioWeightMap.get(a.id) ?? 1;
+        const weightedTarget = t * w;
+        if (sums[a.type] !== undefined) {
+          sums[a.type] += weightedTarget;
+        }
+        totalMicro += weightedTarget;
+      }
+    });
+
+    (Object.keys(sums) as AssetType[]).forEach(k => {
+      sums[k] = round1(sums[k]);
+    });
+
+    return {
+      microDerivedByClass: sums,
+      classesWithAssets: present,
+      hasAnyMicroTargets: totalMicro > 0.01
+    };
+  }, [assets, assetPortfolioWeightMap]);
+
+  // Dedicated cash reserve target (defaults to 0 when micro targets exist so legacy default 10% Cash never pollutes 100% portfolios)
+  const [explicitCashTarget, setExplicitCashTarget] = useState<number>(() => {
+    try {
+      const saved = localStorage.getItem(`investai_cash_target_${activePortfolioId}`);
+      if (saved !== null) {
+        const parsed = parseFloat(saved);
+        if (Number.isFinite(parsed) && parsed >= 0) return round1(parsed);
+      }
+    } catch {}
+    return 0;
+  });
+
+  // Synchronized Macro Targets: automatically derived from Planificare & Rebalansare (Micro -> Macro)
+  const targets = useMemo<Record<AssetType, number>>(() => {
+    if (!hasAnyMicroTargets) {
+      return localTargets;
+    }
+    const merged: Record<AssetType, number> = { ...ZERO_TARGETS };
+    (Object.keys(DEFAULT_TARGETS) as AssetType[]).forEach(type => {
+      if (type === AssetType.CASH) {
+        merged[type] = round1(Math.max(0, explicitCashTarget));
+      } else if (classesWithAssets.has(type)) {
+        merged[type] = microDerivedByClass[type];
+      } else {
+        merged[type] = 0;
+      }
+    });
+    return merged;
+  }, [hasAnyMicroTargets, localTargets, explicitCashTarget, classesWithAssets, microDerivedByClass]);
+
+  // Persist synchronized target allocations (so JSON backup & AI Global Report stay 100% in sync)
   useEffect(() => {
     localStorage.setItem(`investai_asset_class_targets_${activePortfolioId}`, JSON.stringify(targets));
   }, [targets, activePortfolioId]);
@@ -134,17 +238,22 @@ export const AssetClassTargetAllocation: React.FC<AssetClassTargetAllocationProp
       stats[type].realized += realizedInReporting;
     });
 
+    // Include uninvested portfolio cash in CASH class
+    if (cashBalance > 0.01 && stats[AssetType.CASH]) {
+      stats[AssetType.CASH].value += cashBalance;
+    }
+
     // Compute Net Profit/Loss and percentages
     Object.keys(stats).forEach((key) => {
       const type = key as AssetType;
       const s = stats[type];
       s.unrealized = s.value - s.cost;
       s.totalPL = s.unrealized + s.realized;
-      s.plPercent = s.cost > 0 ? (s.totalPL / s.cost) * 105 : 0; // Adjusted for cumulative cost
+      s.plPercent = s.cost > 0 ? (s.totalPL / s.cost) * 100 : 0;
     });
 
     return stats;
-  }, [assets, reportingCurrency, convertValue]);
+  }, [assets, reportingCurrency, convertValue, cashBalance]);
 
   // Calculate actual weights based on current net worth
   const actualValuesAndPercentages = useMemo(() => {
@@ -162,17 +271,25 @@ export const AssetClassTargetAllocation: React.FC<AssetClassTargetAllocationProp
     };
   }, [categoryStats, netWorth]);
 
-  // Handle target change
+  // Handle target change (Bidirectional Macro -> Micro sync)
   const handleTargetChange = (type: AssetType, value: number) => {
-    const sanitized = Math.max(0, Math.min(100, value));
-    setTargets((prev) => ({
+    const sanitized = Math.max(0, Math.min(100, round1(Number(value) || 0)));
+    setLocalTargets((prev) => ({
       ...prev,
       [type]: sanitized,
     }));
+    if (type === AssetType.CASH) {
+      setExplicitCashTarget(sanitized);
+      try {
+        localStorage.setItem(`investai_cash_target_${activePortfolioId}`, String(sanitized));
+      } catch {}
+    } else if (onUpdateClassTarget && classesWithAssets.has(type)) {
+      onUpdateClassTarget(type, sanitized);
+    }
   };
 
   const totalTarget = useMemo(() => {
-    return Object.values(targets).reduce((acc, curr) => acc + curr, 0);
+    return round1(Object.values(targets).reduce((acc, curr) => acc + (Number(curr) || 0), 0));
   }, [targets]);
 
   // AI Rebalance Helper
@@ -206,13 +323,14 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
 
     const totalValue = netWorth || 1;
     
-    // 1. Calculate ideal allocations based on targets
+    // 1. Calculate post-investment ideal allocations based on synchronized class targets
+    const postTotalValue = totalValue + amount;
     const targetsList = Object.keys(targets).map(key => {
       const type = key as AssetType;
       const targetPct = targets[type] || 0;
       const actualVal = actualValuesAndPercentages.values[type] || 0;
-      const targetVal = (totalValue * targetPct) / 100;
-      const deficit = Math.max(0, targetVal - actualVal); // Deficit is positive or 0
+      const targetVal = (postTotalValue * targetPct) / 100;
+      const deficit = Math.max(0, targetVal - actualVal); // Post-investment deficit is positive or 0
       const isSelected = selectedMacroTypes[type] !== false; // Checked by default (true) unless explicitly unchecked (false)
       
       return { type, targetPct, actualVal, targetVal, deficit, isSelected };
@@ -285,14 +403,16 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
     // Filter out assets that are open (quantity > 0) OR have a target allocation > 0
     const activeAssets = assets.filter(a => Number(a.quantity) > 0.000001 || (a.targetAllocation && a.targetAllocation > 0));
 
-    // Calculate ideal values, actual values and deficits for each asset
+    // Calculate post-investment ideal values, actual values and deficits for each asset (aligned with Macro DCA)
+    const postTotalValue = totalValue + amount;
     const assetsList = activeAssets.map(asset => {
       const qty = Number(asset.quantity) || 0;
       const currentPrice = Number(asset.currentPrice) || 0;
-      const targetPct = asset.targetAllocation || 0;
+      const pWeight = assetPortfolioWeightMap.get(asset.id) ?? 1;
+      const targetPct = (Number(asset.targetAllocation) || 0) * pWeight;
       
       const actualVal = convertValue(qty * currentPrice, asset.currency, reportingCurrency);
-      const targetVal = (totalValue * targetPct) / 100;
+      const targetVal = (postTotalValue * targetPct) / 100;
       const deficit = Math.max(0, targetVal - actualVal);
       const isSelected = selectedMicroAssetIds[asset.id] !== false; // Checked by default
       
@@ -363,11 +483,14 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
       }
       return b.suggestedAmount - a.suggestedAmount;
     });
-  }, [investAmount, assets, convertValue, reportingCurrency, netWorth, selectedMicroAssetIds]);
+  }, [investAmount, assets, convertValue, reportingCurrency, netWorth, selectedMicroAssetIds, assetPortfolioWeightMap]);
 
   const totalMicroTarget = useMemo(() => {
-    return assets.reduce((acc, asset) => acc + (asset.targetAllocation || 0), 0);
-  }, [assets]);
+    return round1(assets.reduce((acc, asset) => {
+      const pWeight = assetPortfolioWeightMap.get(asset.id) ?? 1;
+      return acc + ((Number(asset.targetAllocation) || 0) * pWeight);
+    }, 0));
+  }, [assets, assetPortfolioWeightMap]);
 
   return (
     <div className="space-y-6">
@@ -395,13 +518,13 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
                 ? 'bg-emerald-950/80 text-emerald-400 border border-emerald-500/20' 
                 : 'bg-amber-950/80 text-amber-400 border border-amber-500/20'
             }`}>
-              {Math.abs(totalTarget - 100) < 0.01 ? (
+              {Math.abs(totalTarget - 100) < 0.05 ? (
                 <>
                   <CheckCircle2 size={14} /> Total: 100% (Configurație Validă)
                 </>
               ) : (
                 <>
-                  <AlertTriangle size={14} className="animate-bounce" /> Total: {totalTarget.toFixed(0)}% (Setați la 100%)
+                  <AlertTriangle size={14} className="animate-bounce" /> Total: {Number(totalTarget.toFixed(1))}% (Setați la 100%)
                 </>
               )}
             </div>
@@ -539,9 +662,9 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
                             type="range"
                             min="0"
                             max="100"
-                            step="5"
+                            step="1"
                             value={targetPct}
-                            onChange={(e) => handleTargetChange(type, parseInt(e.target.value) || 0)}
+                            onChange={(e) => handleTargetChange(type, parseFloat(e.target.value) || 0)}
                             className="w-16 accent-emerald-500 cursor-ew-resize hidden lg:block"
                           />
                           <div className="flex items-center border border-slate-700 bg-slate-950 rounded px-2 py-0.5 text-xs">
@@ -549,9 +672,10 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
                               type="number"
                               min="0"
                               max="100"
+                              step="0.5"
                               value={targetPct}
-                              onChange={(e) => handleTargetChange(type, parseInt(e.target.value) || 0)}
-                              className="w-8 bg-transparent text-right text-white font-bold outline-none"
+                              onChange={(e) => handleTargetChange(type, parseFloat(e.target.value) || 0)}
+                              className="w-11 bg-transparent text-right text-white font-bold outline-none"
                             />
                             <span className="text-slate-500 font-bold ml-0.5">%</span>
                           </div>
@@ -829,7 +953,8 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
                           </tr>
                         ) : (
                           microInvestmentSuggestions.map((sug) => {
-                            const target = sug.asset.targetAllocation || 0;
+                            const pWeight = assetPortfolioWeightMap.get(sug.asset.id) ?? 1;
+                            const target = round1((Number(sug.asset.targetAllocation) || 0) * pWeight);
                             const deviation = sug.currentWeight - target;
                             return (
                               <tr key={sug.asset.id} className={`hover:bg-slate-850/50 transition-colors ${!sug.isSelected ? 'opacity-40 bg-slate-950/25' : ''}`}>
@@ -852,6 +977,11 @@ Te rog să îmi oferi o strategie detaliată și personalizată de rebalansare d
                                 <td className="p-3 font-sans text-slate-400">
                                   <span className="text-[10px] bg-slate-800 border border-slate-700 text-slate-300 px-1.5 py-0.5 rounded">
                                     {sug.asset.type}
+                                  </span>
+                                </td>
+                                <td className="p-3 text-right">
+                                  <span className={deviation < 0 ? 'text-emerald-400 font-bold' : 'text-slate-400'}>
+                                    {deviation < 0 ? '' : '+'}{deviation.toFixed(2)}%
                                   </span>
                                 </td>
                                 <td className="p-3 text-right font-mono text-xs">
