@@ -44,9 +44,11 @@ import {
   Loader2,
   ArrowDownLeft,
   ArrowUpLeft,
-  Split
+  Split,
+  Layers
 } from 'lucide-react';
 import { Portfolio, Asset, Transaction, TransactionType, AssetType, getAssetCategoryGroup } from './types';
+import { GICS_SECTORS, getStockSector, getAssetClassification, getSectorMeta } from './services/sectorService';
 import { INITIAL_PORTFOLIOS, EXCHANGE_RATES as DEFAULT_EXCHANGE_RATES } from './constants';
 import { fetchLatestPrices, fetchYahooExchangeRates, fetchSingleAssetPrice } from './services/priceService';
 import {
@@ -281,6 +283,9 @@ const App: React.FC = () => {
   const [tempTickerValue, setTempTickerValue] = useState<string>('');
   const [refreshingAssetId, setRefreshingAssetId] = useState<string | null>(null);
   const [assetSearchTerm, setAssetSearchTerm] = useState('');
+  const [holdingsViewMode, setHoldingsViewMode] = useState<'list' | 'sectors'>('list');
+  const [collapsedSectors, setCollapsedSectors] = useState<Record<string, boolean>>({});
+  const [rebalanceSectorFilter, setRebalanceSectorFilter] = useState<string>('all');
   const [cashSearchTerm, setCashSearchTerm] = useState('');
   const [assetDeleteConfirm, setAssetDeleteConfirm] = useState<{ isOpen: boolean, asset: Asset | null }>({ isOpen: false, asset: null });
   const [deleteAssetWithTransactions, setDeleteAssetWithTransactions] = useState(false);
@@ -300,6 +305,8 @@ const App: React.FC = () => {
     isin: string;
     name: string;
     type: AssetType;
+    sector: string;
+    subSector: string;
     currency: string;
     targetAllocation: number;
   }>({
@@ -308,6 +315,8 @@ const App: React.FC = () => {
     isin: '',
     name: '',
     type: AssetType.ETF,
+    sector: 'Information Technology',
+    subSector: '',
     currency: 'EUR',
     targetAllocation: 3
   });
@@ -1025,6 +1034,8 @@ const App: React.FC = () => {
       name: string;
       type: AssetType;
       isin?: string;
+      sector?: string;
+      subSector?: string;
       currency: string;
     }
   ) => {
@@ -1043,6 +1054,8 @@ const App: React.FC = () => {
         targetAsset.name = updatedDetails.name;
         targetAsset.type = updatedDetails.type;
         targetAsset.isin = updatedDetails.isin;
+        targetAsset.sector = updatedDetails.sector;
+        targetAsset.subSector = updatedDetails.subSector;
         targetAsset.currency = updatedDetails.currency;
 
         const updatedTransactions = p.transactions.map(t => {
@@ -1300,14 +1313,78 @@ const App: React.FC = () => {
     }));
   };
 
-  const handleOpenAddPlannedAsset = () => {
+  // Bidirectional Sector -> Micro sync: scales all active/targeted STOCK assets in `sector` so their sum equals `newSectorPortfolioTarget` exactly (to 0.1%)
+  const handleUpdateSectorTarget = (sector: string, newSectorPortfolioTarget: number) => {
+    const targetTotal = Math.max(0, Math.min(100, Math.round((Number(newSectorPortfolioTarget) || 0) * 10) / 10));
+    const targetPortfolioIds = new Set(activePortfolios.map(p => p.id));
+
+    setPortfolios(prev => prev.map(p => {
+      if (!targetPortfolioIds.has(p.id)) return p;
+
+      const eligibleIndices: number[] = [];
+      p.assets.forEach((a, idx) => {
+        if (
+          a.type === AssetType.STOCK &&
+          getStockSector(a) === sector &&
+          ((Number(a.quantity) || 0) > 0.000001 || (Number(a.targetAllocation) || 0) > 0)
+        ) {
+          eligibleIndices.push(idx);
+        }
+      });
+
+      if (eligibleIndices.length === 0) return p;
+
+      const updatedAssets = [...p.assets];
+
+      if (targetTotal <= 0) {
+        eligibleIndices.forEach(idx => {
+          updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: 0 };
+        });
+        return { ...p, assets: updatedAssets };
+      }
+
+      const currentTargetSum = eligibleIndices.reduce((s, idx) => s + (Number(p.assets[idx].targetAllocation) || 0), 0);
+      let weights: number[];
+      if (currentTargetSum > 0.001) {
+        weights = eligibleIndices.map(idx => (Number(p.assets[idx].targetAllocation) || 0) / currentTargetSum);
+      } else {
+        const marketVals = eligibleIndices.map(idx => {
+          const a = p.assets[idx];
+          return Math.max(0, convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency));
+        });
+        const mvSum = marketVals.reduce((s, v) => s + v, 0);
+        weights = mvSum > 0.001 ? marketVals.map(v => v / mvSum) : eligibleIndices.map(() => 1 / eligibleIndices.length);
+      }
+
+      const totalTenths = Math.round(targetTotal * 10);
+      const rawTenths = weights.map(w => w * totalTenths);
+      const floorTenths = rawTenths.map(v => Math.floor(v));
+      const remainder = totalTenths - floorTenths.reduce((s, v) => s + v, 0);
+      const order = rawTenths
+        .map((v, i) => ({ i, frac: v - floorTenths[i] }))
+        .sort((a, b) => b.frac - a.frac);
+      for (let k = 0; k < remainder && k < order.length; k++) {
+        floorTenths[order[k].i] += 1;
+      }
+
+      eligibleIndices.forEach((idx, i) => {
+        updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: floorTenths[i] / 10 };
+      });
+
+      return { ...p, assets: updatedAssets };
+    }));
+  };
+
+  const handleOpenAddPlannedAsset = (prefillSector?: string) => {
     const defaultPortfolio = activePortfolioId === 'all' ? (portfolios[0] || null) : (activePortfolios[0] || null);
     setNewPlannedAsset({
       portfolioId: defaultPortfolio?.id || 'p1',
       symbol: '',
       isin: '',
       name: '',
-      type: AssetType.ETF,
+      type: prefillSector ? AssetType.STOCK : AssetType.ETF,
+      sector: prefillSector || 'Information Technology',
+      subSector: '',
       currency: defaultPortfolio?.currency || reportingCurrency || 'EUR',
       targetAllocation: 3
     });
@@ -1321,6 +1398,8 @@ const App: React.FC = () => {
     const cleanIsin = newPlannedAsset.isin.trim().toUpperCase();
     const cleanName = newPlannedAsset.name.trim() || cleanSymbol;
     const cleanTarget = Math.max(0, Math.min(100, Math.round((Number(newPlannedAsset.targetAllocation) || 0) * 10) / 10));
+    const cleanSector = newPlannedAsset.type === AssetType.STOCK ? (newPlannedAsset.sector.trim() || undefined) : undefined;
+    const cleanSubSector = newPlannedAsset.subSector.trim() || undefined;
     const targetPortfolioId = newPlannedAsset.portfolioId || (activePortfolioId !== 'all' ? activePortfolioId : portfolios[0]?.id);
 
     setPortfolios(prev => prev.map(p => {
@@ -1331,7 +1410,9 @@ const App: React.FC = () => {
         updatedAssets[existingIdx] = {
           ...updatedAssets[existingIdx],
           targetAllocation: cleanTarget,
-          ...(cleanIsin ? { isin: cleanIsin } : {})
+          ...(cleanIsin ? { isin: cleanIsin } : {}),
+          ...(cleanSector ? { sector: cleanSector } : {}),
+          ...(cleanSubSector ? { subSector: cleanSubSector } : {})
         };
         return { ...p, assets: updatedAssets };
       }
@@ -1347,7 +1428,9 @@ const App: React.FC = () => {
         currency: newPlannedAsset.currency || p.currency || 'EUR',
         realizedPL: 0,
         targetAllocation: cleanTarget,
-        ...(cleanIsin ? { isin: cleanIsin } : {})
+        ...(cleanIsin ? { isin: cleanIsin } : {}),
+        ...(cleanSector ? { sector: cleanSector } : {}),
+        ...(cleanSubSector ? { subSector: cleanSubSector } : {})
       };
       return { ...p, assets: [...p.assets, plannedAsset] };
     }));
@@ -2213,7 +2296,26 @@ const App: React.FC = () => {
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden">
                     <div className="p-6 border-b border-slate-800 flex flex-wrap gap-4 justify-between items-center bg-slate-900">
                        <h3 className="text-lg font-bold text-white flex items-center gap-2 whitespace-nowrap"><CheckCircle2 className="text-emerald-400" size={20} /> Dețineri Actuale (Nivel Micro)</h3>
-                       <div className="flex items-center gap-3">
+                       <div className="flex flex-wrap items-center gap-3">
+                         {openAssets.some(a => a.type === AssetType.STOCK) && (
+                           <div className="bg-slate-950 p-1 rounded-lg border border-slate-800 flex items-center">
+                             <button
+                               type="button"
+                               onClick={() => setHoldingsViewMode('list')}
+                               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all cursor-pointer ${holdingsViewMode === 'list' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                             >
+                               Listă
+                             </button>
+                             <button
+                               type="button"
+                               onClick={() => setHoldingsViewMode('sectors')}
+                               className={`px-2.5 py-1 rounded-md text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer ${holdingsViewMode === 'sectors' ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}
+                             >
+                               <Layers size={12} />
+                               <span>Pe Sectoare</span>
+                             </button>
+                           </div>
+                         )}
                          <button 
                            onClick={handleRefreshPrices} 
                            disabled={isRefreshing} 
@@ -2232,76 +2334,196 @@ const App: React.FC = () => {
                            <tr><th className="p-4 whitespace-nowrap">Activ</th><th className="p-4 w-24 whitespace-nowrap">Alocare <br/><span className="text-[10px] lowercase text-slate-500">din Net Worth</span></th><th className="p-4 text-right whitespace-nowrap">Cantitate</th><th className="p-4 text-right whitespace-nowrap">Preț Mediu <br/><span className="text-[10px] lowercase">(break-even)</span></th><th className="p-4 text-right whitespace-nowrap">Preț Piață <br/><span className="text-[10px] lowercase text-emerald-500">(Yahoo Live / Click edit)</span></th><th className="p-4 text-right whitespace-nowrap">Valoare</th><th className="p-4 text-right whitespace-nowrap">P/L (Net) <br/><span className="text-[10px] lowercase">Nerealizat / Realizat</span></th><th className="p-4 text-center whitespace-nowrap">Acțiuni</th></tr>
                          </thead>
                          <tbody className="divide-y divide-slate-800 text-sm">
-                           {openAssets.filter(asset => { const term = assetSearchTerm.toLowerCase(); return asset.symbol.toLowerCase().includes(term) || asset.name.toLowerCase().includes(term); }).map(asset => {
-                              const quantity = Number(asset.quantity) || 0; const currentPrice = Number(asset.currentPrice) || 0; const buyPrice = Number(asset.buyPrice) || 0; const realizedPL = Number(asset.realizedPL) || 0; const marketValue = quantity * currentPrice; const costBasis = quantity * buyPrice; const unrealizedPL = marketValue - costBasis; const unrealizedPLPercent = costBasis > 0 ? (unrealizedPL / costBasis) * 100 : 0; const totalNetWorth = Number(macroStats.netWorth) || 1; const allocationPercent = totalNetWorth > 0 ? (convertValue(marketValue, asset.currency, reportingCurrency) / totalNetWorth) * 100 : 0; const isExpanded = expandedAssetId === asset.id; const assetTransactions = activeTransactions.filter(t => t.symbol === asset.symbol).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); const parentPortfolio = activePortfolios.find(p => p.assets.some(pa => pa.id === asset.id)); const isEditingPrice = editingPriceId === asset.id;
-                              return (
-                                <React.Fragment key={asset.id}>
-                                  <tr className="hover:bg-slate-800/50 transition-colors group">
-                                    <td className="p-4 align-top"><div className="flex gap-3"><button onClick={(e) => { e.stopPropagation(); toggleAssetExpansion(asset.id); }} className="mt-1 text-slate-500 hover:text-emerald-400">{isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button><div onClick={() => setSelectedAssetIdForDetails(asset.id)} className="cursor-pointer group/text"><div className="font-bold text-white flex items-center gap-2 group-hover/text:text-emerald-400">{asset.symbol}<span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-normal">{asset.type}</span>{activePortfolioId === 'all' && parentPortfolio && (<span className="text-[10px] bg-slate-800/90 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 font-medium">{parentPortfolio.name}</span>)}<BarChart2 size={12} className="opacity-0 group-hover/text:opacity-100 text-emerald-500" /></div><div className="text-xs text-slate-500 truncate max-w-[150px]">{asset.name}</div></div></div></td>
-                                    <td className="p-4 align-middle"><div className="flex flex-col gap-1 w-full min-w-[80px]"><span className="text-xs text-slate-400 font-mono text-right">{allocationPercent.toFixed(1)}%</span><div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(allocationPercent, 100)}%` }}></div></div></div></td>
-                                    <td className="p-4 text-right font-mono text-white align-middle">{quantity.toLocaleString('ro-RO', { maximumFractionDigits: 4 })}</td>
-                                    <td className="p-4 text-right font-mono text-slate-400 align-middle">
-                                      <div>{buyPrice.toLocaleString('ro-RO', { minimumFractionDigits: 2 })} <span className="text-[10px]">{asset.currency}</span></div>
-                                      {asset.currency === 'RON' && (
-                                        <div className="text-[10px] text-slate-500 font-normal">
-                                          ≈ {convertValue(buyPrice, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="p-4 text-right font-mono text-white align-middle">
-                                      <div className="flex flex-col items-end">
-                                        <div className="flex items-center justify-end gap-1.5">
-                                            <button
-                                              onClick={() => handleRefreshSingleAsset(asset)}
-                                              disabled={refreshingAssetId === asset.id || isRefreshing}
-                                              className="p-1 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded transition-colors disabled:opacity-40"
-                                              title="Actualizează prețul acestui activ live de pe Yahoo Finance"
-                                            >
-                                              <RefreshCw size={12} className={refreshingAssetId === asset.id ? 'animate-spin text-emerald-400' : ''} />
-                                            </button>
-                                            {asset.lastRefreshSuccess === false && (<div className="group relative" title="Yahoo Finance: Ultima actualizare a eșuat."><AlertTriangle size={14} className="text-amber-500 animate-pulse cursor-help" /></div>)}
-                                            {isEditingPrice ? (<input autoFocus type="number" step="any" className="w-24 bg-slate-950 border border-emerald-500 text-white text-right px-2 py-1 rounded outline-none text-sm" value={tempPriceValue} onChange={(e) => setTempPriceValue(e.target.value)} onBlur={() => { if (tempPriceValue && !isNaN(parseFloat(tempPriceValue))) { handleUpdateAssetPrice(asset.id, parseFloat(tempPriceValue)); } else { setEditingPriceId(null); } }} onKeyDown={(e) => { if (e.key === 'Enter') { if (tempPriceValue && !isNaN(parseFloat(tempPriceValue))) { handleUpdateAssetPrice(asset.id, parseFloat(tempPriceValue)); } } else if (e.key === 'Escape') { setEditingPriceId(null); } }} />) : (<div onClick={() => { setTempPriceValue(currentPrice.toString()); setEditingPriceId(asset.id); }} className="flex items-center justify-end gap-1 cursor-pointer hover:text-emerald-400 transition-colors group/edit" title="Click pentru a edita prețul manual">{currentPrice.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-[10px] text-slate-500 group-hover/edit:text-emerald-500 ml-1">{asset.currency}</span><Edit3 size={10} className="text-slate-600 group-hover/edit:text-emerald-400 opacity-0 group-hover/edit:opacity-100 transition-opacity" /></div>)}
-                                        </div>
-                                        {asset.currency === 'RON' && (
-                                          <div className="text-[10px] text-slate-500 font-normal">
-                                            ≈ {convertValue(currentPrice, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                                          </div>
-                                        )}
-                                        {asset.lastRefreshTime && asset.lastRefreshSuccess && (<span className="text-[9px] text-slate-500 font-normal">Actualizat: {asset.lastRefreshTime}</span>)}
-                                      </div>
-                                    </td>
-                                    <td className="p-4 text-right font-bold font-mono text-emerald-400 align-middle">
-                                      <div>{marketValue.toLocaleString('ro-RO', { minimumFractionDigits: 2 })}<span className="text-[10px] text-slate-500 ml-1">{asset.currency}</span></div>
-                                      {asset.currency === 'RON' && (
-                                        <div className="text-[10px] text-slate-400 font-normal">
-                                          ≈ {convertValue(marketValue, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="p-4 text-right align-middle">
-                                      <div className={`text-sm font-bold flex items-center justify-end gap-1 ${unrealizedPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
-                                        {unrealizedPL >= 0 ? '+' : ''}{unrealizedPL.toLocaleString('ro-RO', { minimumFractionDigits: 2 })} <span className="text-[10px] opacity-70">{unrealizedPLPercent.toFixed(2)}%</span>
-                                      </div>
-                                      {asset.currency === 'RON' && (
-                                        <div className="text-[10px] text-slate-400 font-normal text-right">
-                                          ≈ {unrealizedPL >= 0 ? '+' : ''}{convertValue(unrealizedPL, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                                        </div>
-                                      )}
-                                      <div className={`text-xs mt-0.5 ${realizedPL >= 0 ? 'text-blue-400' : 'text-rose-400'}`}>
-                                        <span className="text-slate-500 mr-1">marcat:</span>{realizedPL >= 0 ? '+' : ''}{realizedPL.toLocaleString('ro-RO', { minimumFractionDigits: 2 })}
-                                      </div>
-                                      {asset.currency === 'RON' && realizedPL !== 0 && (
-                                        <div className="text-[10px] text-slate-500 font-normal text-right">
-                                          ≈ {realizedPL >= 0 ? '+' : ''}{convertValue(realizedPL, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
-                                        </div>
-                                      )}
-                                    </td>
-                                    <td className="p-4 align-middle"><div className="flex items-center justify-center gap-1.5"><button onClick={() => openAssetTransactionModal(asset)} className="p-1.5 hover:bg-emerald-500/10 text-emerald-500 rounded-md transition-colors" title="Adaugă Tranzacție"><ArrowRightLeft size={16} /></button><button onClick={() => setSelectedAssetForSplit(asset)} className="p-1.5 hover:bg-amber-500/15 text-amber-400 rounded-md transition-colors" title="Aplică Stock Split / Consolidare"><Split size={16} /></button><button onClick={() => setSelectedAssetForPositions(asset)} className="p-1.5 hover:bg-slate-700 text-slate-400 hover:text-white rounded-md transition-colors" title="FIFO"><MoreHorizontal size={16} /></button><button onClick={() => handleRequestAssetDelete(asset)} className="p-1.5 hover:bg-rose-500/10 text-rose-500 rounded-md transition-colors" title="Șterge Activ"><Trash2 size={16} /></button></div></td>
-                                  </tr>
-                                  {isExpanded && (<tr className="bg-slate-900/50"><td colSpan={8} className="p-0 border-b border-slate-800"><div className="p-4 bg-slate-950/30 shadow-inner min-w-[600px] lg:min-w-0"><h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><History size={14} /> Istoric Tranzacții - {asset.symbol}</h4><table className="w-full text-xs text-left"><thead><tr className="text-slate-500 border-b border-slate-800"><th className="pb-2">Data</th><th className="pb-2">Tip</th><th className="pb-2 text-right">Cantitate</th><th className="pb-2 text-right">Preț</th><th className="pb-2 text-right">Valoare</th><th className="pb-2 text-right">Taxe</th><th className="pb-2 text-center">Acțiuni</th></tr></thead><tbody className="divide-y divide-slate-800/50">{assetTransactions.map(tx => (<tr key={tx.id} className="text-slate-300"><td className="py-2">{tx.date}</td><td className="py-2"><span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${tx.type === 'Cumpărare Activ' ? 'bg-emerald-900/30 text-emerald-400' : tx.type === 'Vânzare Activ' ? 'bg-amber-900/30 text-amber-400' : 'bg-slate-800 text-slate-400'}`}>{tx.type}</span></td><td className="py-2 text-right font-mono">{Number(tx.quantity) || '-'}</td><td className="py-2 text-right font-mono">{Number(tx.price)?.toFixed(2) || '-'}</td><td className="py-2 text-right font-mono">{Number(tx.amount).toFixed(2)}</td><td className="py-2 text-right text-rose-400 font-mono">{tx.tax ? Number(tx.tax).toFixed(2) : '-'}</td><td className="py-2 text-center flex items-center justify-center gap-2"><button onClick={() => { setEditingTransaction(tx); setTransactionAllowedTypes(undefined); setShowTransactionForm(true); }} className="p-1 text-blue-500 hover:bg-blue-500/10 rounded transition-colors"><Pencil size={12} /></button><button onClick={() => { if (parentPortfolio) handleRequestDeleteTransaction(tx.id, parentPortfolio.id, asset.symbol); }} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded transition-colors"><Trash2 size={12} /></button></td></tr>))}</tbody></table></div></td></tr>)}
-                                </React.Fragment>
-                              );
-                           })}
+                           {(() => {
+                             const filteredOpenAssets = openAssets.filter(asset => {
+                               const term = assetSearchTerm.toLowerCase();
+                               if (!term) return true;
+                               const sec = getStockSector(asset).toLowerCase();
+                               return asset.symbol.toLowerCase().includes(term) || asset.name.toLowerCase().includes(term) || sec.includes(term);
+                             });
+
+                             const renderOpenAssetRow = (asset: Asset) => {
+                               const quantity = Number(asset.quantity) || 0; const currentPrice = Number(asset.currentPrice) || 0; const buyPrice = Number(asset.buyPrice) || 0; const realizedPL = Number(asset.realizedPL) || 0; const marketValue = quantity * currentPrice; const costBasis = quantity * buyPrice; const unrealizedPL = marketValue - costBasis; const unrealizedPLPercent = costBasis > 0 ? (unrealizedPL / costBasis) * 100 : 0; const totalNetWorth = Number(macroStats.netWorth) || 1; const allocationPercent = totalNetWorth > 0 ? (convertValue(marketValue, asset.currency, reportingCurrency) / totalNetWorth) * 100 : 0; const isExpanded = expandedAssetId === asset.id; const assetTransactions = activeTransactions.filter(t => t.symbol === asset.symbol).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()); const parentPortfolio = activePortfolios.find(p => p.assets.some(pa => pa.id === asset.id)); const isEditingPrice = editingPriceId === asset.id;
+                               return (
+                                 <React.Fragment key={asset.id}>
+                                   <tr className="hover:bg-slate-800/50 transition-colors group">
+                                     <td className="p-4 align-top"><div className="flex gap-3"><button onClick={(e) => { e.stopPropagation(); toggleAssetExpansion(asset.id); }} className="mt-1 text-slate-500 hover:text-emerald-400">{isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}</button><div onClick={() => setSelectedAssetIdForDetails(asset.id)} className="cursor-pointer group/text"><div className="font-bold text-white flex items-center gap-2 group-hover/text:text-emerald-400">{asset.symbol}<span className="text-[10px] bg-slate-800 text-slate-400 px-1.5 py-0.5 rounded border border-slate-700 font-normal">{asset.type}</span>{activePortfolioId === 'all' && parentPortfolio && (<span className="text-[10px] bg-slate-800/90 text-blue-400 px-1.5 py-0.5 rounded border border-blue-500/30 font-medium">{parentPortfolio.name}</span>)}<BarChart2 size={12} className="opacity-0 group-hover/text:opacity-100 text-emerald-500" /></div><div className="text-xs text-slate-500 truncate max-w-[150px]">{asset.name}</div></div></div></td>
+                                     <td className="p-4 align-middle"><div className="flex flex-col gap-1 w-full min-w-[80px]"><span className="text-xs text-slate-400 font-mono text-right">{allocationPercent.toFixed(1)}%</span><div className="h-1.5 w-full bg-slate-800 rounded-full overflow-hidden"><div className="h-full bg-emerald-500 rounded-full" style={{ width: `${Math.min(allocationPercent, 100)}%` }}></div></div></div></td>
+                                     <td className="p-4 text-right font-mono text-white align-middle">{quantity.toLocaleString('ro-RO', { maximumFractionDigits: 4 })}</td>
+                                     <td className="p-4 text-right font-mono text-slate-400 align-middle">
+                                       <div>{buyPrice.toLocaleString('ro-RO', { minimumFractionDigits: 2 })} <span className="text-[10px]">{asset.currency}</span></div>
+                                       {asset.currency === 'RON' && (
+                                         <div className="text-[10px] text-slate-500 font-normal">
+                                           ≈ {convertValue(buyPrice, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                                         </div>
+                                       )}
+                                     </td>
+                                     <td className="p-4 text-right font-mono text-white align-middle">
+                                       <div className="flex flex-col items-end">
+                                         <div className="flex items-center justify-end gap-1.5">
+                                             <button
+                                               onClick={() => handleRefreshSingleAsset(asset)}
+                                               disabled={refreshingAssetId === asset.id || isRefreshing}
+                                               className="p-1 text-slate-500 hover:text-emerald-400 hover:bg-slate-800 rounded transition-colors disabled:opacity-40"
+                                               title="Actualizează prețul acestui activ live de pe Yahoo Finance"
+                                             >
+                                               <RefreshCw size={12} className={refreshingAssetId === asset.id ? 'animate-spin text-emerald-400' : ''} />
+                                             </button>
+                                             {asset.lastRefreshSuccess === false && (<div className="group relative" title="Yahoo Finance: Ultima actualizare a eșuat."><AlertTriangle size={14} className="text-amber-500 animate-pulse cursor-help" /></div>)}
+                                             {isEditingPrice ? (<input autoFocus type="number" step="any" className="w-24 bg-slate-950 border border-emerald-500 text-white text-right px-2 py-1 rounded outline-none text-sm" value={tempPriceValue} onChange={(e) => setTempPriceValue(e.target.value)} onBlur={() => { if (tempPriceValue && !isNaN(parseFloat(tempPriceValue))) { handleUpdateAssetPrice(asset.id, parseFloat(tempPriceValue)); } else { setEditingPriceId(null); } }} onKeyDown={(e) => { if (e.key === 'Enter') { if (tempPriceValue && !isNaN(parseFloat(tempPriceValue))) { handleUpdateAssetPrice(asset.id, parseFloat(tempPriceValue)); } } else if (e.key === 'Escape') { setEditingPriceId(null); } }} />) : (<div onClick={() => { setTempPriceValue(currentPrice.toString()); setEditingPriceId(asset.id); }} className="flex items-center justify-end gap-1 cursor-pointer hover:text-emerald-400 transition-colors group/edit" title="Click pentru a edita prețul manual">{currentPrice.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}<span className="text-[10px] text-slate-500 group-hover/edit:text-emerald-500 ml-1">{asset.currency}</span><Edit3 size={10} className="text-slate-600 group-hover/edit:text-emerald-400 opacity-0 group-hover/edit:opacity-100 transition-opacity" /></div>)}
+                                         </div>
+                                         {asset.currency === 'RON' && (
+                                           <div className="text-[10px] text-slate-500 font-normal">
+                                             ≈ {convertValue(currentPrice, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                                           </div>
+                                         )}
+                                         {asset.lastRefreshTime && asset.lastRefreshSuccess && (<span className="text-[9px] text-slate-500 font-normal">Actualizat: {asset.lastRefreshTime}</span>)}
+                                       </div>
+                                     </td>
+                                     <td className="p-4 text-right font-bold font-mono text-emerald-400 align-middle">
+                                       <div>{marketValue.toLocaleString('ro-RO', { minimumFractionDigits: 2 })}<span className="text-[10px] text-slate-500 ml-1">{asset.currency}</span></div>
+                                       {asset.currency === 'RON' && (
+                                         <div className="text-[10px] text-slate-400 font-normal">
+                                           ≈ {convertValue(marketValue, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                                         </div>
+                                       )}
+                                     </td>
+                                     <td className="p-4 text-right align-middle">
+                                       <div className={`text-sm font-bold flex items-center justify-end gap-1 ${unrealizedPL >= 0 ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                         {unrealizedPL >= 0 ? '+' : ''}{unrealizedPL.toLocaleString('ro-RO', { minimumFractionDigits: 2 })} <span className="text-[10px] opacity-70">{unrealizedPLPercent.toFixed(2)}%</span>
+                                       </div>
+                                       {asset.currency === 'RON' && (
+                                         <div className="text-[10px] text-slate-400 font-normal text-right">
+                                           ≈ {unrealizedPL >= 0 ? '+' : ''}{convertValue(unrealizedPL, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                                         </div>
+                                       )}
+                                       <div className={`text-xs mt-0.5 ${realizedPL >= 0 ? 'text-blue-400' : 'text-rose-400'}`}>
+                                         <span className="text-slate-500 mr-1">marcat:</span>{realizedPL >= 0 ? '+' : ''}{realizedPL.toLocaleString('ro-RO', { minimumFractionDigits: 2 })}
+                                       </div>
+                                       {asset.currency === 'RON' && realizedPL !== 0 && (
+                                         <div className="text-[10px] text-slate-500 font-normal text-right">
+                                           ≈ {realizedPL >= 0 ? '+' : ''}{convertValue(realizedPL, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} EUR
+                                         </div>
+                                       )}
+                                     </td>
+                                     <td className="p-4 align-middle"><div className="flex items-center justify-center gap-1.5"><button onClick={() => openAssetTransactionModal(asset)} className="p-1.5 hover:bg-emerald-500/10 text-emerald-500 rounded-md transition-colors" title="Adaugă Tranzacție"><ArrowRightLeft size={16} /></button><button onClick={() => setSelectedAssetForSplit(asset)} className="p-1.5 hover:bg-amber-500/15 text-amber-400 rounded-md transition-colors" title="Aplică Stock Split / Consolidare"><Split size={16} /></button><button onClick={() => setSelectedAssetForPositions(asset)} className="p-1.5 hover:bg-slate-700 text-slate-400 hover:text-white rounded-md transition-colors" title="FIFO"><MoreHorizontal size={16} /></button><button onClick={() => handleRequestAssetDelete(asset)} className="p-1.5 hover:bg-rose-500/10 text-rose-500 rounded-md transition-colors" title="Șterge Activ"><Trash2 size={16} /></button></div></td>
+                                   </tr>
+                                   {isExpanded && (<tr className="bg-slate-900/50"><td colSpan={8} className="p-0 border-b border-slate-800"><div className="p-4 bg-slate-950/30 shadow-inner min-w-[600px] lg:min-w-0"><h4 className="text-xs font-bold text-slate-500 uppercase mb-3 flex items-center gap-2"><History size={14} /> Istoric Tranzacții - {asset.symbol}</h4><table className="w-full text-xs text-left"><thead><tr className="text-slate-500 border-b border-slate-800"><th className="pb-2">Data</th><th className="pb-2">Tip</th><th className="pb-2 text-right">Cantitate</th><th className="pb-2 text-right">Preț</th><th className="pb-2 text-right">Valoare</th><th className="pb-2 text-right">Taxe</th><th className="pb-2 text-center">Acțiuni</th></tr></thead><tbody className="divide-y divide-slate-800/50">{assetTransactions.map(tx => (<tr key={tx.id} className="text-slate-300"><td className="py-2">{tx.date}</td><td className="py-2"><span className={`px-1.5 py-0.5 rounded text-[10px] uppercase font-bold ${tx.type === 'Cumpărare Activ' ? 'bg-emerald-900/30 text-emerald-400' : tx.type === 'Vânzare Activ' ? 'bg-amber-900/30 text-amber-400' : 'bg-slate-800 text-slate-400'}`}>{tx.type}</span></td><td className="py-2 text-right font-mono">{Number(tx.quantity) || '-'}</td><td className="py-2 text-right font-mono">{Number(tx.price)?.toFixed(2) || '-'}</td><td className="py-2 text-right font-mono">{Number(tx.amount).toFixed(2)}</td><td className="py-2 text-right text-rose-400 font-mono">{tx.tax ? Number(tx.tax).toFixed(2) : '-'}</td><td className="py-2 text-center flex items-center justify-center gap-2"><button onClick={() => { setEditingTransaction(tx); setTransactionAllowedTypes(undefined); setShowTransactionForm(true); }} className="p-1 text-blue-500 hover:bg-blue-500/10 rounded transition-colors"><Pencil size={12} /></button><button onClick={() => { if (parentPortfolio) handleRequestDeleteTransaction(tx.id, parentPortfolio.id, asset.symbol); }} className="p-1 text-rose-500 hover:bg-rose-500/10 rounded transition-colors"><Trash2 size={12} /></button></td></tr>))}</tbody></table></div></td></tr>)}
+                                 </React.Fragment>
+                               );
+                             };
+
+                             if (holdingsViewMode === 'list' || !openAssets.some(a => a.type === AssetType.STOCK)) {
+                               return filteredOpenAssets.map(renderOpenAssetRow);
+                             }
+
+                             // Grouped by Sector view: Individual Stocks grouped by GICS Sector + Other Asset Classes below
+                             const stockAssets = filteredOpenAssets.filter(a => a.type === AssetType.STOCK);
+                             const nonStockAssets = filteredOpenAssets.filter(a => a.type !== AssetType.STOCK);
+                             const totalStocksVal = stockAssets.reduce((s, a) => s + convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency), 0);
+                             const totalNetWorth = Number(macroStats.netWorth) || 1;
+
+                             const sectorGroups = new Map<string, { sector: string; items: Asset[]; value: number; cost: number; realized: number }>();
+                             stockAssets.forEach(a => {
+                               const sec = getStockSector(a);
+                               const val = convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency);
+                               const cost = convertValue((Number(a.quantity) || 0) * (Number(a.buyPrice) || 0), a.currency, reportingCurrency);
+                               const real = convertValue(Number(a.realizedPL) || 0, a.currency, reportingCurrency);
+                               const ex = sectorGroups.get(sec);
+                               if (ex) {
+                                 ex.items.push(a);
+                                 ex.value += val;
+                                 ex.cost += cost;
+                                 ex.realized += real;
+                               } else {
+                                 sectorGroups.set(sec, { sector: sec, items: [a], value: val, cost, realized: real });
+                               }
+                             });
+
+                             const sortedGroups = Array.from(sectorGroups.values()).sort((a, b) => b.value - a.value);
+
+                             return (
+                               <>
+                                 {sortedGroups.map(group => {
+                                   const isCollapsed = !!collapsedSectors[group.sector];
+                                   const meta = getSectorMeta(group.sector);
+                                   const pctOfStocks = totalStocksVal > 0 ? (group.value / totalStocksVal) * 100 : 0;
+                                   const pctOfPortfolio = (group.value / totalNetWorth) * 100;
+                                   const unrlPL = group.value - group.cost;
+                                   const unrlPct = group.cost > 0 ? (unrlPL / group.cost) * 100 : 0;
+                                   return (
+                                     <React.Fragment key={`sec-grp-${group.sector}`}>
+                                       <tr
+                                         onClick={() => setCollapsedSectors(prev => ({ ...prev, [group.sector]: !prev[group.sector] }))}
+                                         className="bg-slate-950/80 hover:bg-slate-800/70 cursor-pointer transition-colors border-t border-slate-800"
+                                       >
+                                         <td colSpan={5} className="px-4 py-3">
+                                           <div className="flex flex-wrap items-center gap-2.5">
+                                             {isCollapsed ? <ChevronDown size={15} className="text-slate-400" /> : <ChevronUp size={15} className="text-emerald-400" />}
+                                             <span className={`w-2.5 h-2.5 rounded-full ${meta.dotColor}`} />
+                                             <span className="font-bold text-white text-xs uppercase tracking-wide">{group.sector}</span>
+                                             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">
+                                               {group.items.length} {group.items.length === 1 ? 'acțiune' : 'acțiuni'}
+                                             </span>
+                                             <span className="text-[11px] text-emerald-400 font-mono font-semibold">
+                                               {pctOfStocks.toFixed(1)}% din Acțiuni
+                                             </span>
+                                             <span className="text-[11px] text-slate-500 font-mono">
+                                               ({pctOfPortfolio.toFixed(1)}% din Portofoliu)
+                                             </span>
+                                           </div>
+                                         </td>
+                                         <td className="px-4 py-3 text-right font-mono font-bold text-white text-xs whitespace-nowrap">
+                                           {group.value.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {reportingCurrency}
+                                         </td>
+                                         <td className="px-4 py-3 text-right font-mono text-xs whitespace-nowrap">
+                                           <span className={unrlPL >= 0 ? 'text-emerald-400 font-bold' : 'text-rose-400 font-bold'}>
+                                             {unrlPL >= 0 ? '+' : ''}{unrlPL.toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency} ({unrlPct >= 0 ? '+' : ''}{unrlPct.toFixed(1)}%)
+                                           </span>
+                                         </td>
+                                         <td className="px-4 py-3 text-center text-[10px] text-slate-500">
+                                           {isCollapsed ? 'Extinde' : 'Restrânge'}
+                                         </td>
+                                       </tr>
+                                       {!isCollapsed && group.items.map(renderOpenAssetRow)}
+                                     </React.Fragment>
+                                   );
+                                 })}
+
+                                 {nonStockAssets.length > 0 && (() => {
+                                   const otherKey = '__OTHER_CLASSES__';
+                                   const isOtherCollapsed = !!collapsedSectors[otherKey];
+                                   const otherVal = nonStockAssets.reduce((s, a) => s + convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency), 0);
+                                   return (
+                                     <React.Fragment key={otherKey}>
+                                       <tr
+                                         onClick={() => setCollapsedSectors(prev => ({ ...prev, [otherKey]: !prev[otherKey] }))}
+                                         className="bg-slate-950/80 hover:bg-slate-800/70 cursor-pointer transition-colors border-t border-slate-700"
+                                       >
+                                         <td colSpan={5} className="px-4 py-3">
+                                           <div className="flex items-center gap-2.5">
+                                             {isOtherCollapsed ? <ChevronDown size={15} className="text-slate-400" /> : <ChevronUp size={15} className="text-blue-400" />}
+                                             <span className="w-2.5 h-2.5 rounded-full bg-slate-400" />
+                                             <span className="font-bold text-slate-300 text-xs uppercase tracking-wide">Alte Clase (ETF / Obligațiuni / Aur / Crypto / Depozite)</span>
+                                             <span className="text-[11px] px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-mono">
+                                               {nonStockAssets.length} active
+                                             </span>
+                                           </div>
+                                         </td>
+                                         <td className="px-4 py-3 text-right font-mono font-bold text-slate-200 text-xs whitespace-nowrap">
+                                           {otherVal.toLocaleString('ro-RO', { minimumFractionDigits: 2, maximumFractionDigits: 2 })} {reportingCurrency}
+                                         </td>
+                                         <td colSpan={2} className="px-4 py-3 text-right text-[11px] text-slate-500 font-mono">
+                                           {((otherVal / totalNetWorth) * 100).toFixed(1)}% din Portofoliu
+                                         </td>
+                                       </tr>
+                                       {!isOtherCollapsed && nonStockAssets.map(renderOpenAssetRow)}
+                                     </React.Fragment>
+                                   );
+                                 })()}
+                               </>
+                             );
+                           })()}
                            {openAssets.length === 0 && (<tr><td colSpan={8} className="p-8 text-center text-slate-500">{assetSearchTerm ? "Nu s-au găsit active." : "Niciun activ deschis."}</td></tr>)}
                          </tbody>
                        </table>
@@ -2319,7 +2541,7 @@ const App: React.FC = () => {
                   </div>
                 )}
 
-                {/* Alocare Tactica Clase de Active */}
+                {/* Alocare Tactica Clase de Active & Sectoare */}
                 <div className="mt-8">
                   <AssetClassTargetAllocation
                     key={activePortfolioId}
@@ -2331,6 +2553,8 @@ const App: React.FC = () => {
                     netWorth={macroStats.netWorth}
                     cashBalance={macroStats.cashBalance}
                     onUpdateClassTarget={handleUpdateClassTarget}
+                    onUpdateSectorTarget={handleUpdateSectorTarget}
+                    onOpenAddPlannedAsset={handleOpenAddPlannedAsset}
                     onAskAI={(prompt) => {
                       setAiExternalPrompt(prompt);
                       aiAdvisorRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -2342,12 +2566,25 @@ const App: React.FC = () => {
                 <div className="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden mt-8">
                     <div className="p-6 border-b border-slate-800 flex flex-wrap gap-3 justify-between items-center bg-slate-900">
                       <h3 className="text-lg font-bold text-white flex items-center gap-2"><Target className="text-emerald-400" size={20} /> Planificare & Rebalansare</h3>
-                      <div className="flex items-center gap-3">
+                      <div className="flex flex-wrap items-center gap-3">
+                        {activeAssets.some(a => a.type === AssetType.STOCK && ((Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0)) && (
+                          <select
+                            value={rebalanceSectorFilter}
+                            onChange={(e) => setRebalanceSectorFilter(e.target.value)}
+                            className="bg-slate-950 border border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-200 outline-none focus:border-emerald-500 cursor-pointer"
+                            title="Filtrează acțiunile după sector"
+                          >
+                            <option value="all">Toate categoriile</option>
+                            {GICS_SECTORS.map(sec => (
+                              <option key={sec} value={sec}>Sector: {sec}</option>
+                            ))}
+                          </select>
+                        )}
                         <button
                           type="button"
-                          onClick={handleOpenAddPlannedAsset}
+                          onClick={() => handleOpenAddPlannedAsset()}
                           className="flex items-center gap-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all shadow-sm hover:border-emerald-500/50 cursor-pointer"
-                          title="Adaugă un activ nou pe care plănuiești să îl cumperi în viitor (se corelează automat cu Ținte Tactice și Calculatorul DCA)"
+                          title="Adaugă un activ nou pe care plănuiești să îl cumperi în viitor (se corelează automat cu Ținte Tactice, Sectoare și Calculatorul DCA)"
                         >
                           <PlusCircle size={14} />
                           <span>Activ Planificat</span>
@@ -2355,7 +2592,7 @@ const App: React.FC = () => {
                         <div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${Math.abs(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0) - 100) < 0.05 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{Number(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0).toFixed(1))}%</span></div>
                       </div>
                     </div>
-                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const isPlannedOnly = qty <= 0.000001 && !activeTransactions.some(t => (t.symbol || '').trim().toUpperCase() === (asset.symbol || '').trim().toUpperCase()); const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white flex items-center gap-1.5">{asset.symbol}{isPlannedOnly && (<span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded font-medium">Planificat</span>)}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span>{isPlannedOnly && (<button type="button" onClick={() => handleRemovePlannedAsset(asset.id)} className="p-1 text-slate-500 hover:text-rose-400 transition-colors" title="Elimină activul planificat"><Trash2 size={14} /></button>)}</div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
+                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => { const isVisible = (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0; if (!isVisible) return false; if (rebalanceSectorFilter !== 'all') return a.type === AssetType.STOCK && getStockSector(a) === rebalanceSectorFilter; return true; }).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const isPlannedOnly = qty <= 0.000001 && !activeTransactions.some(t => (t.symbol || '').trim().toUpperCase() === (asset.symbol || '').trim().toUpperCase()); const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; const stockSector = asset.type === AssetType.STOCK ? getStockSector(asset) : null; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white flex items-center gap-1.5">{asset.symbol}{isPlannedOnly && (<span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded font-medium">Planificat</span>)}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><div className="flex flex-col items-start gap-1"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span>{stockSector && (<span className="text-[10px] text-slate-400 font-medium pl-1">{stockSector}</span>)}</div></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span>{isPlannedOnly && (<button type="button" onClick={() => handleRemovePlannedAsset(asset.id)} className="p-1 text-slate-500 hover:text-rose-400 transition-colors" title="Elimină activul planificat"><Trash2 size={14} /></button>)}</div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>
@@ -2413,7 +2650,16 @@ const App: React.FC = () => {
                     className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white uppercase font-mono outline-none focus:ring-2 focus:ring-emerald-500"
                     placeholder="ex: WNRG.DE"
                     value={newPlannedAsset.symbol}
-                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, symbol: e.target.value.toUpperCase() })}
+                    onChange={e => {
+                      const sym = e.target.value.toUpperCase();
+                      const detected = getAssetClassification({ symbol: sym, type: newPlannedAsset.type, currency: newPlannedAsset.currency } as Asset);
+                      const isKnownGics = GICS_SECTORS.includes(detected.sector as any);
+                      setNewPlannedAsset({
+                        ...newPlannedAsset,
+                        symbol: sym,
+                        ...(isKnownGics ? { sector: detected.sector, subSector: detected.subSector } : {})
+                      });
+                    }}
                   />
                 </div>
                 <div>
@@ -2482,6 +2728,32 @@ const App: React.FC = () => {
                   </select>
                 </div>
               </div>
+              {newPlannedAsset.type === AssetType.STOCK && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-slate-400 mb-1">Sector (GICS)</label>
+                    <select
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                      value={newPlannedAsset.sector}
+                      onChange={e => setNewPlannedAsset({ ...newPlannedAsset, sector: e.target.value })}
+                    >
+                      {GICS_SECTORS.map(sec => (
+                        <option key={sec} value={sec}>{sec}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-slate-400 mb-1">Subcategorie (opțional)</label>
+                    <input
+                      type="text"
+                      className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                      placeholder="ex: Biotech / Pharma"
+                      value={newPlannedAsset.subSector}
+                      onChange={e => setNewPlannedAsset({ ...newPlannedAsset, subSector: e.target.value })}
+                    />
+                  </div>
+                </div>
+              )}
               <div className="flex justify-end gap-3 mt-6">
                 <button type="button" onClick={() => setShowAddPlannedAsset(false)} className="text-slate-400 hover:text-white px-3 py-2">Anulează</button>
                 <button type="submit" className="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg font-medium">Adaugă în Plan</button>

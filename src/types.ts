@@ -39,6 +39,8 @@ export interface Asset {
   name: string;
   type: AssetType;
   isin?: string;
+  sector?: string;
+  subSector?: string;
   quantity: number;
   buyPrice: number;
   currentPrice: number;

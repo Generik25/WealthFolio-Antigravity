@@ -1,8 +1,9 @@
 
 import React, { useMemo } from 'react';
 import { Asset, Transaction, TransactionType } from '../types';
-import { X, TrendingUp, TrendingDown, DollarSign, Activity, Wallet, Calendar, PieChart, Pencil, Split } from 'lucide-react';
+import { X, TrendingUp, TrendingDown, DollarSign, Activity, Wallet, Calendar, PieChart, Pencil, Split, Layers, Globe } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
+import { getAssetClassification, getSectorMeta } from '../services/sectorService';
 
 interface AssetDetailsModalProps {
   asset: Asset;
@@ -80,11 +81,13 @@ const AssetDetailsModal: React.FC<AssetDetailsModalProps> = ({ asset, transactio
         }));
   }, [transactions]);
 
-  // --- CALCULATE DAILY CHANGE ---
+  // --- CALCULATE DAILY CHANGE & SECTOR CLASSIFICATION ---
   const prevClose = asset.previousClose || asset.currentPrice;
   const dailyChangeValue = asset.currentPrice - prevClose;
   const dailyChangePercent = prevClose > 0 ? (dailyChangeValue / prevClose) * 100 : 0;
   const isUp = dailyChangeValue >= 0;
+  const classification = useMemo(() => getAssetClassification(asset), [asset]);
+  const sectorMeta = useMemo(() => getSectorMeta(classification.sector), [classification.sector]);
 
   return (
     <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 sm:p-4 backdrop-blur-sm animate-in fade-in duration-200">
@@ -102,8 +105,29 @@ const AssetDetailsModal: React.FC<AssetDetailsModalProps> = ({ asset, transactio
                     <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-normal whitespace-nowrap">
                        {asset.type}
                     </span>
+                    <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full border font-medium inline-flex items-center gap-1 whitespace-nowrap ${sectorMeta.badgeClass}`}>
+                       <Layers size={11} />
+                       {classification.sector}
+                    </span>
                  </h2>
-                 <p className="text-slate-400 text-xs sm:text-sm truncate">{asset.name}</p>
+                 <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-slate-400 text-xs sm:text-sm mt-0.5">
+                    <span className="text-slate-300 font-medium truncate">{asset.name}</span>
+                    {classification.subSector && (
+                       <>
+                          <span className="text-slate-600">•</span>
+                          <span className="text-slate-400 truncate">{classification.subSector}</span>
+                       </>
+                    )}
+                    {classification.region && (
+                       <>
+                          <span className="text-slate-600">•</span>
+                          <span className="inline-flex items-center gap-1 text-slate-400 whitespace-nowrap">
+                             <Globe size={11} className="text-slate-500" />
+                             {classification.region}
+                          </span>
+                       </>
+                    )}
+                 </div>
                  <div className="flex flex-wrap items-center gap-2 mt-2 text-xs font-mono">
                     <span className="bg-slate-900 px-2 py-1 rounded text-white border border-slate-800 whitespace-nowrap">
                        Preț: <span className="font-bold">{asset.currentPrice.toLocaleString('ro-RO', { minimumFractionDigits: 2 })}</span> {asset.currency}

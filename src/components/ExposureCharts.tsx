@@ -3,6 +3,7 @@ import { PieChart, Pie, Cell, Tooltip, ResponsiveContainer, Legend } from 'recha
 import { Asset, AssetType } from '../types';
 import { Globe, Layers } from 'lucide-react';
 import { DEFAULT_ETF_DATABASE, ETFCoverageData, normalizeYahooTicker, findEtfDatabaseKey } from './ETFOverlapAnalysis';
+import { getAssetClassification } from '../services/sectorService';
 
 interface ExposureChartsProps {
   assets: Asset[];
@@ -431,6 +432,7 @@ const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f43f5e', '#f59e0b', '#06b6d4'
 
 export const ExposureCharts: React.FC<ExposureChartsProps> = React.memo(({ assets, currency, cashBalance, convertValue }) => {
   const getAssetInfo = (asset: Asset) => {
+    const cls = getAssetClassification(asset);
     const symbol = asset.symbol.toUpperCase();
     const normSymbol = normalizeYahooTicker(symbol);
     const match = ASSET_MAPPING[symbol] || 
@@ -440,6 +442,18 @@ export const ExposureCharts: React.FC<ExposureChartsProps> = React.memo(({ asset
                   ASSET_MAPPING[symbol + '.L'] ||
                   ASSET_MAPPING[normSymbol + '.RO'] ||
                   ASSET_MAPPING[normSymbol + '.DE'];
+
+    // Explicit user-chosen asset.sector always takes highest priority so ExposureCharts stays 100% synchronized with Sector Targets
+    if (asset.sector && asset.sector.trim()) {
+      return {
+        region: match?.region || cls.region,
+        sector: asset.sector.trim()
+      };
+    }
+
+    if (cls.sector !== 'Altele / Neclasificat') {
+      return { region: cls.region, sector: cls.sector };
+    }
     if (match) return match;
 
     if (asset.type === AssetType.CASH) return { region: 'Lichidități', sector: 'Cash & Liquidities' };

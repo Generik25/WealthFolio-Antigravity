@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Asset, AssetType } from '../types';
-import { X, Save, Edit3, AlertCircle, Sparkles, Tag, Globe, Hash, Split } from 'lucide-react';
+import { X, Save, Edit3, AlertCircle, Sparkles, Tag, Globe, Hash, Split, Layers } from 'lucide-react';
+import { GICS_SECTORS, getAssetClassification } from '../services/sectorService';
 
 interface EditAssetModalProps {
   asset: Asset;
@@ -12,6 +13,8 @@ interface EditAssetModalProps {
     name: string;
     type: AssetType;
     isin?: string;
+    sector?: string;
+    subSector?: string;
     currency: string;
   }) => void;
   onOpenStockSplit?: (asset: Asset) => void;
@@ -24,11 +27,14 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
   onSave,
   onOpenStockSplit
 }) => {
+  const detectedClass = getAssetClassification(asset);
   const [symbol, setSymbol] = useState(asset.symbol || '');
   const [customTicker, setCustomTicker] = useState(asset.customTicker || '');
   const [name, setName] = useState(asset.name || '');
   const [type, setType] = useState<AssetType>(asset.type || AssetType.STOCK);
   const [isin, setIsin] = useState(asset.isin || '');
+  const [sector, setSector] = useState(asset.sector || detectedClass.sector || '');
+  const [subSector, setSubSector] = useState(asset.subSector || detectedClass.subSector || '');
   const [currency, setCurrency] = useState(asset.currency || 'USD');
   const [error, setError] = useState('');
 
@@ -45,6 +51,8 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
       name: name.trim() || symbol.trim().toUpperCase(),
       type,
       isin: isin.trim() || undefined,
+      sector: sector.trim() || undefined,
+      subSector: subSector.trim() || undefined,
       currency
     });
   };
@@ -183,6 +191,44 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
               value={isin}
               onChange={(e) => setIsin(e.target.value)}
             />
+          </div>
+
+          {/* Sector & Subsector */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Layers size={13} className="text-purple-400" /> Sector (GICS)
+              </label>
+              <select
+                value={sector}
+                onChange={(e) => setSector(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+              >
+                {!GICS_SECTORS.includes(sector as any) && sector && (
+                  <option value={sector}>{sector}</option>
+                )}
+                {GICS_SECTORS.map((sec) => (
+                  <option key={sec} value={sec}>{sec}</option>
+                ))}
+                <option value="Bonds & Fixed Income">Bonds & Fixed Income</option>
+                <option value="Diversified Equities">Diversified Equities</option>
+                <option value="Materials & Commodities">Materials & Commodities</option>
+                <option value="Crypto Assets">Crypto Assets</option>
+                <option value="Cash & Liquidities">Cash & Liquidities</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                Subcategorie / Industrie
+              </label>
+              <input
+                type="text"
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+                placeholder="ex: Semiconductors & AI"
+                value={subSector}
+                onChange={(e) => setSubSector(e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Stock Split Action Callout */}
