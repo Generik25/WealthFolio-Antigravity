@@ -218,6 +218,19 @@ export const ASSET_METADATA_CATALOG: Record<string, AssetClassification> = {
   'BNKE.PA': { sector: 'Financial Services', subSector: 'ETF Sectorial Euro Stoxx Banks', region: 'Europe' },
   'DFEN.DE': { sector: 'Aerospace & Defense', subSector: 'ETF Tematic Apărare Globală', region: 'North America' },
   'EUDF.DE': { sector: 'Aerospace & Defense', subSector: 'ETF Tematic Apărare Europa', region: 'Europe' },
+  'XDWT.DE': { sector: 'Information Technology', subSector: 'ETF Sectorial MSCI World IT', region: 'Global Market' },
+  'QDVE.DE': { sector: 'Information Technology', subSector: 'ETF Sectorial S&P 500 IT', region: 'North America' },
+  'W1TB.DE': { sector: 'Information Technology', subSector: 'ETF Tematic Cybersecurity', region: 'Global Market' },
+  'SEC0.DE': { sector: 'Information Technology', subSector: 'ETF Tematic Global Semiconductors', region: 'Global Market' },
+  'BNXG.DE': { sector: 'Information Technology', subSector: 'ETF Tematic Global Blockchain', region: 'Global Market' },
+  'XSNR.DE': { sector: 'Industrials', subSector: 'ETF Sectorial Europe Industrials', region: 'Europe' },
+  'IS0E.DE': { sector: 'Materials', subSector: 'ETF Sectorial Gold Producers', region: 'Global Market' },
+  'IUHC.L': { sector: 'Healthcare', subSector: 'ETF Sectorial S&P 500 Health Care', region: 'North America' },
+  'XDWH.DE': { sector: 'Healthcare', subSector: 'ETF Sectorial MSCI World Health Care', region: 'Global Market' },
+  'EXV4.DE': { sector: 'Healthcare', subSector: 'ETF Sectorial Europe Health Care', region: 'Europe' },
+  'IUES.L': { sector: 'Energy', subSector: 'ETF Sectorial S&P 500 Energy', region: 'North America' },
+  'XDEW.DE': { sector: 'Energy', subSector: 'ETF Sectorial MSCI World Energy', region: 'Global Market' },
+  'EXH1.DE': { sector: 'Energy', subSector: 'ETF Sectorial Europe Oil & Gas', region: 'Europe' },
 
   // --- BOND ETFs, SOVEREIGN BONDS & DEPOSITS ---
   'ERNX.DE': { sector: 'Bonds & Fixed Income', subSector: 'Obligațiuni Corporative EUR Ultra-Short', region: 'Europe' },
@@ -342,4 +355,192 @@ export const getAssetClassification = (asset: Asset): AssetClassification => {
 export const getStockSector = (asset: Asset): string => {
   const cls = getAssetClassification(asset);
   return normalizeToGicsSector(cls.sector);
+};
+
+const GICS_SECTOR_SET = new Set<string>(GICS_SECTORS);
+
+/**
+ * Determines whether an ETF is a Core (Broad Market) ETF or a Satellite (Sector / Thematic) ETF.
+ * Priority:
+ * 1. Explicit user override (`asset.etfRole`)
+ * 2. Explicit or catalog sector mapping cleanly to a single GICS sector (not Diversified Equities / Fixed Income)
+ * 3. Look-through ETF database top GICS sector >= 65%
+ */
+export const getEtfRole = (
+  asset: Asset,
+  etfSectors?: Array<{ name?: string; sector?: string; weight: number }>
+): 'core' | 'satellite' => {
+  if (asset.type !== AssetType.ETF) return 'core';
+  if (asset.etfRole === 'satellite' || asset.etfRole === 'core') {
+    return asset.etfRole;
+  }
+
+  const cls = getAssetClassification(asset);
+  const norm = normalizeToGicsSector(cls.sector);
+  if (GICS_SECTOR_SET.has(norm)) {
+    return 'satellite';
+  }
+
+  if (etfSectors && etfSectors.length > 0) {
+    const grouped: Record<string, number> = {};
+    let totalW = 0;
+    etfSectors.forEach(s => {
+      const w = Number(s.weight) || 0;
+      if (w <= 0) return;
+      const g = normalizeToGicsSector(s.name ?? s.sector ?? '');
+      grouped[g] = (grouped[g] || 0) + w;
+      totalW += w;
+    });
+    if (totalW > 0) {
+      const top = Object.entries(grouped).sort((a, b) => b[1] - a[1])[0];
+      if (top && GICS_SECTOR_SET.has(top[0]) && (top[1] / totalW) >= 0.65) {
+        return 'satellite';
+      }
+    }
+  }
+
+  return 'core';
+};
+
+export const isSatelliteEtf = (
+  asset: Asset,
+  etfSectors?: Array<{ name?: string; sector?: string; weight: number }>
+): boolean => {
+  return asset.type === AssetType.ETF && getEtfRole(asset, etfSectors) === 'satellite';
+};
+
+/**
+ * Returns the primary GICS sector for an individual stock or a satellite sector ETF.
+ */
+export const getSatelliteSector = (
+  asset: Asset,
+  etfSectors?: Array<{ name?: string; sector?: string; weight: number }>
+): string | null => {
+  if (asset.type === AssetType.STOCK) {
+    return getStockSector(asset);
+  }
+  if (asset.type === AssetType.ETF && isSatelliteEtf(asset, etfSectors)) {
+    const cls = getAssetClassification(asset);
+    const norm = normalizeToGicsSector(cls.sector);
+    if (GICS_SECTOR_SET.has(norm)) return norm;
+
+    if (etfSectors && etfSectors.length > 0) {
+      const grouped: Record<string, number> = {};
+      etfSectors.forEach(s => {
+        const w = Number(s.weight) || 0;
+        if (w <= 0) return;
+        const g = normalizeToGicsSector(s.name ?? s.sector ?? '');
+        if (GICS_SECTOR_SET.has(g)) {
+          grouped[g] = (grouped[g] || 0) + w;
+        }
+      });
+      const top = Object.entries(grouped).sort((a, b) => b[1] - a[1])[0];
+      if (top) return top[0];
+    }
+    return 'Information Technology';
+  }
+  return null;
+};
+
+export type SectorBenchmarkId = 'manual' | 'msci_world' | 'balanced' | 'defensive' | 'growth';
+
+export interface SectorBenchmarkProfile {
+  id: SectorBenchmarkId;
+  name: string;
+  shortDesc: string;
+  /** Weights as % of total equity exposure (sum = 100) */
+  weights: Record<GicsSector, number>;
+}
+
+export const SECTOR_BENCHMARKS: Record<SectorBenchmarkId, SectorBenchmarkProfile> = {
+  manual: {
+    id: 'manual',
+    name: 'Manual (Personalizat)',
+    shortDesc: 'Setezi liber ținta totală pe fiecare sector peste podeaua ETF-urilor Core.',
+    weights: {
+      'Information Technology': 22,
+      'Financial Services': 14,
+      'Healthcare': 12,
+      'Industrials': 11,
+      'Consumer Discretionary': 10,
+      'Communication Services': 8,
+      'Consumer Staples': 7,
+      'Energy': 6,
+      'Utilities': 4,
+      'Materials': 3.5,
+      'Real Estate': 2.5,
+    },
+  },
+  msci_world: {
+    id: 'msci_world',
+    name: 'MSCI World (Neutral de Piață)',
+    shortDesc: 'Aliniază expunerea combinată Core + Satelit cu ponderea globală a pieței dezvoltate.',
+    weights: {
+      'Information Technology': 25.0,
+      'Financial Services': 16.0,
+      'Industrials': 11.0,
+      'Healthcare': 11.0,
+      'Consumer Discretionary': 10.5,
+      'Communication Services': 8.0,
+      'Consumer Staples': 6.0,
+      'Energy': 4.0,
+      'Materials': 3.5,
+      'Utilities': 2.5,
+      'Real Estate': 2.5,
+    },
+  },
+  balanced: {
+    id: 'balanced',
+    name: 'Echilibrat (Anti-Concentrare)',
+    shortDesc: 'Plafonează IT și Financials și redistribuie sateliții spre Healthcare, Industrials, Staples și Energy.',
+    weights: {
+      'Information Technology': 18.0,
+      'Healthcare': 14.0,
+      'Financial Services': 13.0,
+      'Industrials': 13.0,
+      'Consumer Staples': 9.0,
+      'Energy': 8.0,
+      'Communication Services': 8.0,
+      'Consumer Discretionary': 7.0,
+      'Utilities': 4.0,
+      'Materials': 3.5,
+      'Real Estate': 2.5,
+    },
+  },
+  defensive: {
+    id: 'defensive',
+    name: 'Defensiv / Calitate & Venit',
+    shortDesc: 'Supraponderează sectoarele reziliente (Healthcare, Staples, Utilities, Energy) pentru volatilitate redusă.',
+    weights: {
+      'Healthcare': 18.0,
+      'Information Technology': 15.0,
+      'Consumer Staples': 14.0,
+      'Financial Services': 11.0,
+      'Industrials': 11.0,
+      'Utilities': 9.0,
+      'Energy': 8.0,
+      'Communication Services': 6.0,
+      'Consumer Discretionary': 4.0,
+      'Materials': 2.0,
+      'Real Estate': 2.0,
+    },
+  },
+  growth: {
+    id: 'growth',
+    name: 'Growth & Tehnologie',
+    shortDesc: 'Supraponderează IT, AI/Semiconductori, Comunicații și Industrials/Defense.',
+    weights: {
+      'Information Technology': 30.0,
+      'Communication Services': 12.0,
+      'Consumer Discretionary': 12.0,
+      'Healthcare': 12.0,
+      'Industrials': 12.0,
+      'Financial Services': 10.0,
+      'Energy': 4.0,
+      'Consumer Staples': 3.0,
+      'Utilities': 2.0,
+      'Materials': 2.0,
+      'Real Estate': 1.0,
+    },
+  },
 };

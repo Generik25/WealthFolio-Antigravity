@@ -1,9 +1,9 @@
 
 import React, { useMemo } from 'react';
-import { Asset, Transaction, TransactionType } from '../types';
+import { Asset, AssetType, Transaction, TransactionType } from '../types';
 import { X, TrendingUp, TrendingDown, DollarSign, Activity, Wallet, Calendar, PieChart, Pencil, Split, Layers, Globe } from 'lucide-react';
 import { ResponsiveContainer, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ReferenceLine } from 'recharts';
-import { getAssetClassification, getSectorMeta } from '../services/sectorService';
+import { getAssetClassification, getSectorMeta, getEtfRole } from '../services/sectorService';
 
 interface AssetDetailsModalProps {
   asset: Asset;
@@ -105,6 +105,15 @@ const AssetDetailsModal: React.FC<AssetDetailsModalProps> = ({ asset, transactio
                     <span className="text-[10px] sm:text-xs px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 font-normal whitespace-nowrap">
                        {asset.type}
                     </span>
+                    {asset.type === AssetType.ETF && (
+                       <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full border font-semibold whitespace-nowrap ${
+                          getEtfRole(asset) === 'satellite'
+                             ? 'bg-violet-500/15 text-violet-300 border-violet-500/30'
+                             : 'bg-sky-500/15 text-sky-300 border-sky-500/30'
+                       }`}>
+                          {getEtfRole(asset) === 'satellite' ? 'ETF Satelit' : 'ETF Core'}
+                       </span>
+                    )}
                     <span className={`text-[10px] sm:text-xs px-2 py-0.5 rounded-full border font-medium inline-flex items-center gap-1 whitespace-nowrap ${sectorMeta.badgeClass}`}>
                        <Layers size={11} />
                        {classification.sector}

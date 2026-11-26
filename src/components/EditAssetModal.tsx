@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Asset, AssetType } from '../types';
 import { X, Save, Edit3, AlertCircle, Sparkles, Tag, Globe, Hash, Split, Layers } from 'lucide-react';
-import { GICS_SECTORS, getAssetClassification } from '../services/sectorService';
+import { GICS_SECTORS, getAssetClassification, getEtfRole } from '../services/sectorService';
 
 interface EditAssetModalProps {
   asset: Asset;
@@ -15,6 +15,7 @@ interface EditAssetModalProps {
     isin?: string;
     sector?: string;
     subSector?: string;
+    etfRole?: 'core' | 'satellite';
     currency: string;
   }) => void;
   onOpenStockSplit?: (asset: Asset) => void;
@@ -28,6 +29,7 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
   onOpenStockSplit
 }) => {
   const detectedClass = getAssetClassification(asset);
+  const detectedEtfRole = getEtfRole(asset);
   const [symbol, setSymbol] = useState(asset.symbol || '');
   const [customTicker, setCustomTicker] = useState(asset.customTicker || '');
   const [name, setName] = useState(asset.name || '');
@@ -35,6 +37,7 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
   const [isin, setIsin] = useState(asset.isin || '');
   const [sector, setSector] = useState(asset.sector || detectedClass.sector || '');
   const [subSector, setSubSector] = useState(asset.subSector || detectedClass.subSector || '');
+  const [etfRole, setEtfRole] = useState<'auto' | 'core' | 'satellite'>(asset.etfRole || 'auto');
   const [currency, setCurrency] = useState(asset.currency || 'USD');
   const [error, setError] = useState('');
 
@@ -53,6 +56,7 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
       isin: isin.trim() || undefined,
       sector: sector.trim() || undefined,
       subSector: subSector.trim() || undefined,
+      etfRole: type === AssetType.ETF ? (etfRole === 'auto' ? undefined : etfRole) : undefined,
       currency
     });
   };
@@ -230,6 +234,23 @@ export const EditAssetModal: React.FC<EditAssetModalProps> = ({
               />
             </div>
           </div>
+
+          {type === AssetType.ETF && (
+            <div>
+              <label className="block text-xs font-semibold text-slate-300 mb-1.5 flex items-center gap-1.5">
+                <Sparkles size={13} className="text-violet-400" /> Rol ETF în Strategia Core-Satellite
+              </label>
+              <select
+                value={etfRole}
+                onChange={(e) => setEtfRole(e.target.value as 'auto' | 'core' | 'satellite')}
+                className="w-full bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2 text-sm text-white focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 outline-none"
+              >
+                <option value="auto">Auto-detectat ({detectedEtfRole === 'satellite' ? 'ETF Satelit Sectorial' : 'ETF Core Piață Largă'})</option>
+                <option value="core">Core (Piață Largă — bază fixă pe sectoare)</option>
+                <option value="satellite">Satelit (Sectorial / Tematic — ajustabil în alocarea pe sectoare)</option>
+              </select>
+            </div>
+          )}
 
           {/* Stock Split Action Callout */}
           {onOpenStockSplit && (

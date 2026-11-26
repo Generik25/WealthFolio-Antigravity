@@ -41,6 +41,7 @@ export interface Asset {
   isin?: string;
   sector?: string;
   subSector?: string;
+  etfRole?: 'core' | 'satellite';
   quantity: number;
   buyPrice: number;
   currentPrice: number;

@@ -48,7 +48,7 @@ import {
   Layers
 } from 'lucide-react';
 import { Portfolio, Asset, Transaction, TransactionType, AssetType, getAssetCategoryGroup } from './types';
-import { GICS_SECTORS, getStockSector, getAssetClassification, getSectorMeta } from './services/sectorService';
+import { GICS_SECTORS, getStockSector, getAssetClassification, getSectorMeta, isSatelliteEtf, getSatelliteSector } from './services/sectorService';
 import { INITIAL_PORTFOLIOS, EXCHANGE_RATES as DEFAULT_EXCHANGE_RATES } from './constants';
 import { fetchLatestPrices, fetchYahooExchangeRates, fetchSingleAssetPrice } from './services/priceService';
 import {
@@ -65,7 +65,7 @@ import { PortfolioPerformanceChart } from './components/PortfolioPerformanceChar
 import { PortfolioPeriodicReturns } from './components/PortfolioPeriodicReturns';
 import { MonthlyPLChart } from './components/MonthlyPLChart';
 import { ExposureCharts } from './components/ExposureCharts';
-import ETFOverlapAnalysis from './components/ETFOverlapAnalysis';
+import ETFOverlapAnalysis, { DEFAULT_ETF_DATABASE, findEtfDatabaseKey } from './components/ETFOverlapAnalysis';
 import TransactionForm from './components/TransactionForm';
 import AssetPositionsModal from './components/AssetPositionsModal';
 import AssetDetailsModal from './components/AssetDetailsModal';
@@ -307,6 +307,7 @@ const App: React.FC = () => {
     type: AssetType;
     sector: string;
     subSector: string;
+    etfRole: 'core' | 'satellite';
     currency: string;
     targetAllocation: number;
   }>({
@@ -317,6 +318,7 @@ const App: React.FC = () => {
     type: AssetType.ETF,
     sector: 'Information Technology',
     subSector: '',
+    etfRole: 'core',
     currency: 'EUR',
     targetAllocation: 3
   });
@@ -1036,6 +1038,7 @@ const App: React.FC = () => {
       isin?: string;
       sector?: string;
       subSector?: string;
+      etfRole?: 'core' | 'satellite';
       currency: string;
     }
   ) => {
@@ -1056,6 +1059,7 @@ const App: React.FC = () => {
         targetAsset.isin = updatedDetails.isin;
         targetAsset.sector = updatedDetails.sector;
         targetAsset.subSector = updatedDetails.subSector;
+        targetAsset.etfRole = updatedDetails.type === AssetType.ETF ? updatedDetails.etfRole : undefined;
         targetAsset.currency = updatedDetails.currency;
 
         const updatedTransactions = p.transactions.map(t => {
@@ -1313,78 +1317,121 @@ const App: React.FC = () => {
     }));
   };
 
-  // Bidirectional Sector -> Micro sync: scales all active/targeted STOCK assets in `sector` so their sum equals `newSectorPortfolioTarget` exactly (to 0.1%)
-  const handleUpdateSectorTarget = (sector: string, newSectorPortfolioTarget: number) => {
+  const getAssetEtfSectors = (a: Asset) => {
+    if (a.type !== AssetType.ETF) return undefined;
+    const mk = findEtfDatabaseKey((a.symbol || '').toUpperCase(), DEFAULT_ETF_DATABASE);
+    return mk ? DEFAULT_ETF_DATABASE[mk]?.sectors : undefined;
+  };
+
+  const applySectorTargetToAssets = (
+    assetsList: Asset[],
+    sector: string,
+    newSectorPortfolioTarget: number,
+    includeSatelliteEtfs: boolean
+  ): Asset[] => {
     const targetTotal = Math.max(0, Math.min(100, Math.round((Number(newSectorPortfolioTarget) || 0) * 10) / 10));
+    const eligibleIndices: number[] = [];
+
+    assetsList.forEach((a, idx) => {
+      const isActiveOrTargeted = (Number(a.quantity) || 0) > 0.000001 || (Number(a.targetAllocation) || 0) > 0;
+      if (!isActiveOrTargeted) return;
+      if (a.type === AssetType.STOCK && getStockSector(a) === sector) {
+        eligibleIndices.push(idx);
+      } else if (includeSatelliteEtfs && a.type === AssetType.ETF) {
+        const etfSectors = getAssetEtfSectors(a);
+        if (isSatelliteEtf(a, etfSectors) && getSatelliteSector(a, etfSectors) === sector) {
+          eligibleIndices.push(idx);
+        }
+      }
+    });
+
+    if (eligibleIndices.length === 0) return assetsList;
+
+    const updatedAssets = [...assetsList];
+
+    if (targetTotal <= 0) {
+      eligibleIndices.forEach(idx => {
+        updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: 0 };
+      });
+      return updatedAssets;
+    }
+
+    const currentTargetSum = eligibleIndices.reduce((s, idx) => s + (Number(assetsList[idx].targetAllocation) || 0), 0);
+    let weights: number[];
+    if (currentTargetSum > 0.001) {
+      weights = eligibleIndices.map(idx => (Number(assetsList[idx].targetAllocation) || 0) / currentTargetSum);
+    } else {
+      const marketVals = eligibleIndices.map(idx => {
+        const a = assetsList[idx];
+        return Math.max(0, convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency));
+      });
+      const mvSum = marketVals.reduce((s, v) => s + v, 0);
+      weights = mvSum > 0.001 ? marketVals.map(v => v / mvSum) : eligibleIndices.map(() => 1 / eligibleIndices.length);
+    }
+
+    const totalTenths = Math.round(targetTotal * 10);
+    const rawTenths = weights.map(w => w * totalTenths);
+    const floorTenths = rawTenths.map(v => Math.floor(v));
+    const remainder = totalTenths - floorTenths.reduce((s, v) => s + v, 0);
+    const order = rawTenths
+      .map((v, i) => ({ i, frac: v - floorTenths[i] }))
+      .sort((a, b) => b.frac - a.frac);
+    for (let k = 0; k < remainder && k < order.length; k++) {
+      floorTenths[order[k].i] += 1;
+    }
+
+    eligibleIndices.forEach((idx, i) => {
+      updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: floorTenths[i] / 10 };
+    });
+
+    return updatedAssets;
+  };
+
+  // Bidirectional Sector -> Micro sync: scales all active/targeted STOCK (+ optionally Satellite ETF) assets in `sector` so their sum equals `newSectorPortfolioTarget` exactly (to 0.1%)
+  const handleUpdateSectorTarget = (sector: string, newSectorPortfolioTarget: number, includeSatelliteEtfs: boolean = true) => {
     const targetPortfolioIds = new Set(activePortfolios.map(p => p.id));
 
     setPortfolios(prev => prev.map(p => {
       if (!targetPortfolioIds.has(p.id)) return p;
-
-      const eligibleIndices: number[] = [];
-      p.assets.forEach((a, idx) => {
-        if (
-          a.type === AssetType.STOCK &&
-          getStockSector(a) === sector &&
-          ((Number(a.quantity) || 0) > 0.000001 || (Number(a.targetAllocation) || 0) > 0)
-        ) {
-          eligibleIndices.push(idx);
-        }
-      });
-
-      if (eligibleIndices.length === 0) return p;
-
-      const updatedAssets = [...p.assets];
-
-      if (targetTotal <= 0) {
-        eligibleIndices.forEach(idx => {
-          updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: 0 };
-        });
-        return { ...p, assets: updatedAssets };
-      }
-
-      const currentTargetSum = eligibleIndices.reduce((s, idx) => s + (Number(p.assets[idx].targetAllocation) || 0), 0);
-      let weights: number[];
-      if (currentTargetSum > 0.001) {
-        weights = eligibleIndices.map(idx => (Number(p.assets[idx].targetAllocation) || 0) / currentTargetSum);
-      } else {
-        const marketVals = eligibleIndices.map(idx => {
-          const a = p.assets[idx];
-          return Math.max(0, convertValue((Number(a.quantity) || 0) * (Number(a.currentPrice) || 0), a.currency, reportingCurrency));
-        });
-        const mvSum = marketVals.reduce((s, v) => s + v, 0);
-        weights = mvSum > 0.001 ? marketVals.map(v => v / mvSum) : eligibleIndices.map(() => 1 / eligibleIndices.length);
-      }
-
-      const totalTenths = Math.round(targetTotal * 10);
-      const rawTenths = weights.map(w => w * totalTenths);
-      const floorTenths = rawTenths.map(v => Math.floor(v));
-      const remainder = totalTenths - floorTenths.reduce((s, v) => s + v, 0);
-      const order = rawTenths
-        .map((v, i) => ({ i, frac: v - floorTenths[i] }))
-        .sort((a, b) => b.frac - a.frac);
-      for (let k = 0; k < remainder && k < order.length; k++) {
-        floorTenths[order[k].i] += 1;
-      }
-
-      eligibleIndices.forEach((idx, i) => {
-        updatedAssets[idx] = { ...updatedAssets[idx], targetAllocation: floorTenths[i] / 10 };
-      });
-
-      return { ...p, assets: updatedAssets };
+      const updatedAssets = applySectorTargetToAssets(p.assets, sector, newSectorPortfolioTarget, includeSatelliteEtfs);
+      return updatedAssets === p.assets ? p : { ...p, assets: updatedAssets };
     }));
   };
 
-  const handleOpenAddPlannedAsset = (prefillSector?: string) => {
+  // Atomic batch application of Core-Satellite Completion targets across multiple sectors at once
+  const handleApplyBatchSectorTargets = (sectorTargetsMap: Record<string, number>, includeSatelliteEtfs: boolean = true) => {
+    const targetPortfolioIds = new Set(activePortfolios.map(p => p.id));
+
+    setPortfolios(prev => prev.map(p => {
+      if (!targetPortfolioIds.has(p.id)) return p;
+      let nextAssets = p.assets;
+      Object.entries(sectorTargetsMap).forEach(([sec, tgt]) => {
+        nextAssets = applySectorTargetToAssets(nextAssets, sec, tgt, includeSatelliteEtfs);
+      });
+      return nextAssets === p.assets ? p : { ...p, assets: nextAssets };
+    }));
+  };
+
+  // Instant Undo for batch sector completion
+  const handleRestoreAssetTargets = (snapshot: Record<string, number>) => {
+    setPortfolios(prev => prev.map(p => ({
+      ...p,
+      assets: p.assets.map(a => snapshot[a.id] !== undefined ? { ...a, targetAllocation: snapshot[a.id] } : a)
+    })));
+  };
+
+  const handleOpenAddPlannedAsset = (prefillSector?: string, prefillType?: AssetType) => {
     const defaultPortfolio = activePortfolioId === 'all' ? (portfolios[0] || null) : (activePortfolios[0] || null);
+    const chosenType = prefillType || (prefillSector ? AssetType.STOCK : AssetType.ETF);
     setNewPlannedAsset({
       portfolioId: defaultPortfolio?.id || 'p1',
       symbol: '',
       isin: '',
       name: '',
-      type: prefillSector ? AssetType.STOCK : AssetType.ETF,
+      type: chosenType,
       sector: prefillSector || 'Information Technology',
       subSector: '',
+      etfRole: (chosenType === AssetType.ETF && prefillSector) ? 'satellite' : 'core',
       currency: defaultPortfolio?.currency || reportingCurrency || 'EUR',
       targetAllocation: 3
     });
@@ -1398,8 +1445,12 @@ const App: React.FC = () => {
     const cleanIsin = newPlannedAsset.isin.trim().toUpperCase();
     const cleanName = newPlannedAsset.name.trim() || cleanSymbol;
     const cleanTarget = Math.max(0, Math.min(100, Math.round((Number(newPlannedAsset.targetAllocation) || 0) * 10) / 10));
-    const cleanSector = newPlannedAsset.type === AssetType.STOCK ? (newPlannedAsset.sector.trim() || undefined) : undefined;
+    const isSatellitePlannedEtf = newPlannedAsset.type === AssetType.ETF && newPlannedAsset.etfRole === 'satellite';
+    const cleanSector = (newPlannedAsset.type === AssetType.STOCK || isSatellitePlannedEtf)
+      ? (newPlannedAsset.sector.trim() || undefined)
+      : undefined;
     const cleanSubSector = newPlannedAsset.subSector.trim() || undefined;
+    const cleanEtfRole = newPlannedAsset.type === AssetType.ETF ? newPlannedAsset.etfRole : undefined;
     const targetPortfolioId = newPlannedAsset.portfolioId || (activePortfolioId !== 'all' ? activePortfolioId : portfolios[0]?.id);
 
     setPortfolios(prev => prev.map(p => {
@@ -1412,7 +1463,8 @@ const App: React.FC = () => {
           targetAllocation: cleanTarget,
           ...(cleanIsin ? { isin: cleanIsin } : {}),
           ...(cleanSector ? { sector: cleanSector } : {}),
-          ...(cleanSubSector ? { subSector: cleanSubSector } : {})
+          ...(cleanSubSector ? { subSector: cleanSubSector } : {}),
+          ...(cleanEtfRole ? { etfRole: cleanEtfRole } : {})
         };
         return { ...p, assets: updatedAssets };
       }
@@ -1430,7 +1482,8 @@ const App: React.FC = () => {
         targetAllocation: cleanTarget,
         ...(cleanIsin ? { isin: cleanIsin } : {}),
         ...(cleanSector ? { sector: cleanSector } : {}),
-        ...(cleanSubSector ? { subSector: cleanSubSector } : {})
+        ...(cleanSubSector ? { subSector: cleanSubSector } : {}),
+        ...(cleanEtfRole ? { etfRole: cleanEtfRole } : {})
       };
       return { ...p, assets: [...p.assets, plannedAsset] };
     }));
@@ -2554,6 +2607,8 @@ const App: React.FC = () => {
                     cashBalance={macroStats.cashBalance}
                     onUpdateClassTarget={handleUpdateClassTarget}
                     onUpdateSectorTarget={handleUpdateSectorTarget}
+                    onApplyBatchSectorTargets={handleApplyBatchSectorTargets}
+                    onRestoreAssetTargets={handleRestoreAssetTargets}
                     onOpenAddPlannedAsset={handleOpenAddPlannedAsset}
                     onAskAI={(prompt) => {
                       setAiExternalPrompt(prompt);
@@ -2592,7 +2647,7 @@ const App: React.FC = () => {
                         <div className="text-xs text-slate-400 flex items-center gap-1"><Info size={14} /> Total Țintă: <span className={`${Math.abs(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0) - 100) < 0.05 ? 'text-emerald-400' : 'text-rose-400'} font-bold ml-1`}>{Number(activeAssets.reduce((s,a)=>s+(Number(a.targetAllocation)||0),0).toFixed(1))}%</span></div>
                       </div>
                     </div>
-                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => { const isVisible = (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0; if (!isVisible) return false; if (rebalanceSectorFilter !== 'all') return a.type === AssetType.STOCK && getStockSector(a) === rebalanceSectorFilter; return true; }).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const isPlannedOnly = qty <= 0.000001 && !activeTransactions.some(t => (t.symbol || '').trim().toUpperCase() === (asset.symbol || '').trim().toUpperCase()); const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; const stockSector = asset.type === AssetType.STOCK ? getStockSector(asset) : null; return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white flex items-center gap-1.5">{asset.symbol}{isPlannedOnly && (<span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded font-medium">Planificat</span>)}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><div className="flex flex-col items-start gap-1"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span>{stockSector && (<span className="text-[10px] text-slate-400 font-medium pl-1">{stockSector}</span>)}</div></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span>{isPlannedOnly && (<button type="button" onClick={() => handleRemovePlannedAsset(asset.id)} className="p-1 text-slate-500 hover:text-rose-400 transition-colors" title="Elimină activul planificat"><Trash2 size={14} /></button>)}</div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
+                    <div className="overflow-x-auto"><table className="w-full text-left border-collapse"><thead className="bg-slate-950 text-slate-400 text-xs uppercase font-medium"><tr><th className="p-4">Activ</th><th className="p-4">Categorie</th><th className="p-4 text-right">Valoare Totală</th><th className="p-4 text-right">Alocare Curentă</th><th className="p-4 text-right w-32">Țintă (%)</th><th className="p-4 text-right">Deviație</th><th className="p-4 text-right">Acțiune Necesară</th></tr></thead><tbody className="divide-y divide-slate-800 text-sm">{activeAssets.filter(a => { const isVisible = (Number(a.quantity) || 0) > 0.000001 || (a.targetAllocation || 0) > 0; if (!isVisible) return false; if (rebalanceSectorFilter !== 'all') { const etfSectors = getAssetEtfSectors(a); const satSec = getSatelliteSector(a, etfSectors); return satSec === rebalanceSectorFilter; } return true; }).sort((a, b) => { const catA = getAssetCategoryGroup(a); const catB = getAssetCategoryGroup(b); if (catA.rank !== catB.rank) return catA.rank - catB.rank; return (a.symbol || '').localeCompare(b.symbol || '', 'ro', { sensitivity: 'base' }); }).map(asset => { const catGroup = getAssetCategoryGroup(asset); const qty = Number(asset.quantity) || 0; const price = Number(asset.currentPrice) || 0; const isPlannedOnly = qty <= 0.000001 && !activeTransactions.some(t => (t.symbol || '').trim().toUpperCase() === (asset.symbol || '').trim().toUpperCase()); const totalVal = convertValue(qty * price, asset.currency, reportingCurrency); const currentAlloc = (totalVal / (Number(macroStats.netWorth) || 1)) * 100; const target = Number(asset.targetAllocation) || 0; const deviation = currentAlloc - target; const diffValue = (Number(macroStats.netWorth) * (target / 100)) - totalVal; const etfSectors = getAssetEtfSectors(asset); const isSatEtf = isSatelliteEtf(asset, etfSectors); const satSector = getSatelliteSector(asset, etfSectors); return (<tr key={asset.id} className="hover:bg-slate-800/50"><td className="p-4 font-medium text-white"><div className="flex flex-col"><span className="font-bold text-white flex items-center gap-1.5">{asset.symbol}{isPlannedOnly && (<span className="text-[10px] bg-blue-500/20 text-blue-300 border border-blue-500/30 px-1.5 py-0.5 rounded font-medium">Planificat</span>)}{isSatEtf && (<span className="text-[10px] bg-violet-500/20 text-violet-300 border border-violet-500/30 px-1.5 py-0.5 rounded font-medium">Satelit</span>)}</span><span className="text-[10px] text-slate-400 font-normal truncate max-w-[140px]">{asset.name}</span></div></td><td className="p-4"><div className="flex flex-col items-start gap-1"><span className={`text-[11px] px-2.5 py-1 rounded-full border font-semibold ${catGroup.badgeColor}`}>{catGroup.name}</span>{satSector && (<span className="text-[10px] text-slate-400 font-medium pl-1">{satSector}</span>)}</div></td><td className="p-4 text-right font-mono text-white font-bold"><div>{totalVal.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(totalVal, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono text-slate-300">{currentAlloc.toFixed(2)}%</td><td className="p-4 text-right"><div className="flex items-center justify-end gap-1"><input type="number" min="0" max="100" step="0.1" value={target} onChange={(e) => handleUpdateTargetAllocation(asset.id, parseFloat(e.target.value) || 0)} className="w-16 bg-slate-950 border border-slate-700 rounded px-2 py-1 text-right text-white text-sm font-bold" /><span className="text-slate-500 font-bold">%</span>{isPlannedOnly && (<button type="button" onClick={() => handleRemovePlannedAsset(asset.id)} className="p-1 text-slate-500 hover:text-rose-400 transition-colors" title="Elimină activul planificat"><Trash2 size={14} /></button>)}</div></td><td className="p-4 text-right"><span className={`font-mono ${Math.abs(deviation) < 0.1 ? 'text-slate-500' : deviation > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>{deviation > 0 ? '+' : ''}{deviation.toFixed(2)}%</span></td><td className="p-4 text-right font-mono font-bold"><div><span className={diffValue > 0 ? 'text-emerald-400' : diffValue < 0 ? 'text-rose-400' : 'text-slate-500'}>{diffValue > 0 ? 'CUMPĂRĂ ' : diffValue < 0 ? 'VINDE ' : '- '}{Math.abs(diffValue).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} {reportingCurrency}</span></div>{reportingCurrency === 'RON' && diffValue !== 0 && (<div className="text-[10px] text-slate-400 font-normal">≈ {diffValue > 0 ? 'CUMPĂRĂ ' : 'VINDE '}{Math.abs(convertValue(diffValue, 'RON', 'EUR')).toLocaleString('ro-RO', { maximumFractionDigits: 0 })} EUR</div>)}</td></tr>); })}<tr className="bg-slate-900/50 text-slate-400 italic"><td className="p-4">CASH (Neinvestit)</td><td className="p-4"><span className="text-[11px] px-2.5 py-1 rounded-full border font-semibold bg-slate-800 text-slate-300 border-slate-700">Cash / Disponibil</span></td><td className="p-4 text-right font-mono text-slate-300 not-italic font-bold"><div>{macroStats.cashBalance.toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} <span className="text-[10px] text-slate-400 font-normal">{reportingCurrency}</span></div>{reportingCurrency === 'RON' && (<div className="text-[10px] text-slate-400 font-normal">≈ {convertValue(macroStats.cashBalance, 'RON', 'EUR').toLocaleString('ro-RO', { minimumFractionDigits: 0, maximumFractionDigits: 2 })} EUR</div>)}</td><td className="p-4 text-right font-mono">{macroStats.netWorth > 0 ? ((macroStats.cashBalance / macroStats.netWorth) * 100).toFixed(2) : 0}%</td><td colSpan={3} className="p-4 text-xs text-right">Banii nealocați sunt folosiți pentru rebalansare.</td></tr></tbody></table></div>
                 </div>
             </div>
         </div>
@@ -2728,7 +2783,20 @@ const App: React.FC = () => {
                   </select>
                 </div>
               </div>
-              {newPlannedAsset.type === AssetType.STOCK && (
+              {newPlannedAsset.type === AssetType.ETF && (
+                <div>
+                  <label className="block text-sm font-medium text-slate-400 mb-1">Rol ETF în Strategie</label>
+                  <select
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                    value={newPlannedAsset.etfRole}
+                    onChange={e => setNewPlannedAsset({ ...newPlannedAsset, etfRole: e.target.value as 'core' | 'satellite' })}
+                  >
+                    <option value="core">Core — Piață Largă (ex. MSCI World, S&P 500, Europe 600)</option>
+                    <option value="satellite">Satelit — Sectorial / Tematic (ex. Energy, Healthcare, AI, Bănci)</option>
+                  </select>
+                </div>
+              )}
+              {(newPlannedAsset.type === AssetType.STOCK || (newPlannedAsset.type === AssetType.ETF && newPlannedAsset.etfRole === 'satellite')) && (
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-slate-400 mb-1">Sector (GICS)</label>
@@ -2747,7 +2815,7 @@ const App: React.FC = () => {
                     <input
                       type="text"
                       className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
-                      placeholder="ex: Biotech / Pharma"
+                      placeholder={newPlannedAsset.type === AssetType.ETF ? 'ex: ETF Sectorial Energie' : 'ex: Biotech / Pharma'}
                       value={newPlannedAsset.subSector}
                       onChange={e => setNewPlannedAsset({ ...newPlannedAsset, subSector: e.target.value })}
                     />
